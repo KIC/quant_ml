@@ -6,3 +6,7 @@ we need to implement a Back-test Summary which is like a Zipline implementation
 
 provide pure python TA-Lib functionalities which are suitable for ML (meaning oscillators
 or other indicators having a bounded domain of [-1, 1]).
+
+
+LATER: i wan to open source this but under the name quant-ml
+

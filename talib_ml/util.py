@@ -6,7 +6,9 @@ import numpy as np
 def one_hot(index, len):
     arr = np.zeros(len)
 
-    if index.values >= 0:
+    if isinstance(index, int):
+        arr[index] = 1.0
+    elif index.values >= 0:
         arr[index] = 1.0
     else:
         arr += np.NAN

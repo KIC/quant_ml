@@ -42,8 +42,6 @@ def future_pct_of_mean(df: _pd.DataFrame, lag: int = 1):
 
 
 # TODO implement this indicators and test them against ta-lib
-# sma             = lambda df: df["Close"].rolling(ma_window).mean(),
-#                                # features
 #                                macd            = lambda df: talib.MACD(df["Close"])[0] / 10,
 #                                macd_signal     = lambda df: talib.MACD(df["Close"])[1] / 10,
 #                                plus_di         = lambda df: talib.PLUS_DI(df["High"], df["Low"], df["Close"]) / 100,

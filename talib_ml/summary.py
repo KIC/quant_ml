@@ -36,3 +36,5 @@ class TradingSummary(Summary):
         cm = confusion_matrix(y.values, y_hat.values)
         return plot_confusion_matrix(cm, figsize=figsize)[0]
 
+
+

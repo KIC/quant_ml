@@ -1,4 +1,5 @@
 pandas-ml-utils
 scikit-learn
+keras
 pandas
 numpy
