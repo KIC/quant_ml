@@ -2,7 +2,7 @@ from collections import Callable
 
 from keras import backend as K
 from keras.layers import Layer
-
+import tensorflow as tf
 
 class CurveFit(Layer):
 
@@ -49,13 +49,13 @@ class LinearRegressionLayer(CurveFit):
 class LPPLLayer(CurveFit):
 
     def __init__(self):
-        super().__init__(-1, LPPLLayer.lppl)
+        super().__init__(3, LPPLLayer.lppl)
 
     @staticmethod
     def lppl(x, args):
         is_bubble = True
-        N = K.constant(x.shape[-1], dtype=x.dtype)
-        t = K.arange(0, N, 1, dtype=x.dtype)
+        N = K.constant(int(x.shape[-1]), dtype=x.dtype)
+        t = K.arange(0, int(x.shape[-1]), 1, dtype=x.dtype)
         tc = args[0]
         m = args[1]
         w = args[2]
@@ -63,7 +63,8 @@ class LPPLLayer(CurveFit):
         # check if OLS regression slope is >= 0 -> bubble detection or < 0 -> anti-bubble detection
         # and calculate the lppl with the given parameters
         dt = (tc - t) if is_bubble else (t - tc)
-        a, b, c1, c2 = LPPLLayer.matrix_equation(x, dt, m, w, N)
+        abcc = LPPLLayer.matrix_equation(x, dt, m, w, N)
+        a, b, c1, c2 = (abcc[0], abcc[1], abcc[2], abcc[3])
         return a + K.pow(dt, m) * (b + ((c1 * K.cos(w * K.log(dt))) + (c2 * K.sin(w * K.log(dt)))))
 
     @staticmethod
@@ -94,13 +95,13 @@ class LPPLLayer(CurveFit):
         yi = K.sum(yi)
 
         A = K.stack([
-            K.stack([N, fi, gi, hi], axis=1),
-            K.stack([fi, fi_pow_2, figi, fihi], axis=1),
-            K.stack([gi, figi, gi_pow_2, gihi], axis=1),
-            K.stack([hi, fihi, gihi, hi_pow_2], axis=1)
+            K.stack([N, fi, gi, hi]),
+            K.stack([fi, fi_pow_2, figi, fihi]),
+            K.stack([gi, figi, gi_pow_2, gihi]),
+            K.stack([hi, fihi, gihi, hi_pow_2])
         ])
 
         b = K.stack([yi, yifi, yigi, yihi])
 
         # do a classic x = (A'A)⁻¹A' b
-        return K.inverse(K.transpose(A) @ A) @ K.transpose(A) @ b
+        return tf.linalg.solve(A, K.reshape(b, (4, 1)))

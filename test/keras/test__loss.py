@@ -1,37 +1,45 @@
-import os
 from unittest import TestCase
+from keras import backend as K
 
-import matplotlib.pyplot as plt
+from talib_ml import one_hot
+from talib_ml.keras.loss import tailed_categorical_crossentropy, differentiable_argmax
+import numpy as np
+
 import pandas as pd
-from keras import Sequential
-
-import talib_ml as tml
-from talib_ml.keras.layers import LinearRegressionLayer
+import os
 
 df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "SPY.csv"), index_col='Date')
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
-print(tml.__version__)
 
 
 class TestKerasLoss(TestCase):
 
-    def test__(self):
+    def test__differentiable_argmax(self):
         """given"""
-        model = Sequential()
-        model.add(LinearRegressionLayer())
-        model.compile(loss='mse', optimizer='adam')
-
-        """ and"""
-        x = df["Adj Close"].values.reshape(1, -1)
-        y = x
+        args = 10
+        argmax = differentiable_argmax(args)
 
         """when"""
-        history = model.fit(x, y, batch_size=1, epochs=300)
+        res = np.array([K.eval(argmax(K.variable(one_hot(i, args)))) for i in range(args)])
 
         """then"""
-        regression_line = model.predict_on_batch(x)
-        rdf = pd.DataFrame({"price": df["Adj Close"], "regression": regression_line}, index=df.index)
-        rdf.plot()
-        plt.savefig('/tmp/figure.png')
+        print(res)
+        np.testing.assert_array_almost_equal(res, np.arange(0, args))
 
-        self.assertTrue(True)
+    def test__tailed_categorical_crossentropy(self):
+        """given"""
+        args = 11
+        truth1 = 1
+        truth2 = 5
+        truth3 = 10
+        loss = tailed_categorical_crossentropy(args, 10)
+
+        """when"""
+        res1 = np.array([K.eval(loss(K.variable(one_hot(truth1, args)), K.variable(one_hot(i, args)))) for i in range(args)])
+        res2 = np.array([K.eval(loss(K.variable(one_hot(truth2, args)), K.variable(one_hot(i, args)))) for i in range(args)])
+        res3 = np.array([K.eval(loss(K.variable(one_hot(truth3, args)), K.variable(one_hot(i, args)))) for i in range(args)])
+
+        """then"""
+        np.testing.assert_array_almost_equal(res1, np.array([ 10.,   0.,  10.,  40.,  90., 160., 250., 360., 490., 640., 810.]))
+        np.testing.assert_array_almost_equal(res2, np.array([250., 160.,  90.,  40.,  10.,   0.,  10.,  40.,  90., 160., 250.]))
+        np.testing.assert_array_almost_equal(res3, np.array([1000.,  810.,  640.,  490.,  360.,  250.,  160.,   90.,   40., 10.,    0.]))
