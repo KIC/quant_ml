@@ -1,8 +1,9 @@
 from collections import Callable
 
+import tensorflow as tf
 from keras import backend as K
 from keras.layers import Layer
-import tensorflow as tf
+
 
 class CurveFit(Layer):
 
@@ -47,23 +48,28 @@ class LinearRegressionLayer(CurveFit):
 
 
 class LPPLLayer(CurveFit):
-
+    # original model:
+    #  dt = tc - t
+    #  dtPm = dt ^ m
+    #  A + B * dtPm + C * dtPm * cos(w * ln(dt) - phi)
     def __init__(self):
         super().__init__(3, LPPLLayer.lppl)
 
     @staticmethod
     def lppl(x, args):
+        # later: check if OLS regression slope is >= 0 -> bubble detection or < 0 -> anti-bubble detection
         is_bubble = True
+
         N = K.constant(int(x.shape[-1]), dtype=x.dtype)
         t = K.arange(0, int(x.shape[-1]), 1, dtype=x.dtype)
-        tc = args[0]
+        tc = args[0] + N
         m = args[1]
         w = args[2]
 
-        # check if OLS regression slope is >= 0 -> bubble detection or < 0 -> anti-bubble detection
         # and calculate the lppl with the given parameters
         dt = (tc - t) if is_bubble else (t - tc)
         abcc = LPPLLayer.matrix_equation(x, dt, m, w, N)
+
         a, b, c1, c2 = (abcc[0], abcc[1], abcc[2], abcc[3])
         return a + K.pow(dt, m) * (b + ((c1 * K.cos(w * K.log(dt))) + (c2 * K.sin(w * K.log(dt)))))
 
