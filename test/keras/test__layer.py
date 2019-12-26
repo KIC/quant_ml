@@ -37,18 +37,15 @@ class TestKerasLayer(TestCase):
     def test__LPPLLayer(self):
         """given"""
         model = Sequential([LPPLLayer()])
-        model.compile(loss='mse', optimizer=SGD(0.1))
+        model.compile(loss='mse', optimizer=SGD(0.2, 0.01))
+        #model.compile(loss='mse', optimizer='adam')
 
-        x = np.log(df["Close"].values).reshape(1, -1)
-        #x = ReScaler((x.min(), x.max()), (1, 2))(x)
-        # rescale x for faster convergence
-        #x = x - x.min()
-        #x = x / x.max()
-        #x = x + 1
-        ##x = np.array([[0.8, 1.0, 0.9]])
+        x = np.log(df["Close"].values)
+        x = ReScaler((x.min(), x.max()), (1, 2))(x)
+        x = x.reshape(1, -1)
 
         """when"""
-        model.fit(x, x, epochs=5000, verbose=0) #, callbacks=[EarlyStopping('loss', 0.00001)])
+        model.fit(x, x, epochs=5000, verbose=0, callbacks=[EarlyStopping('loss')])
 
         """then"""
         print(model.predict_on_batch(x))

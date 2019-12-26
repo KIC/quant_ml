@@ -1,9 +1,10 @@
-from keras import backend as K
+from keras import backend as _K
+from keras.losses import categorical_crossentropy
 
 
 def differentiable_argmax(nr_of_categories, beta=1e10, dtype='float32'):
-    y_range = K.arange(0, nr_of_categories, dtype=dtype)
-    return lambda y: K.sum(K.softmax(y * beta) * y_range, axis=-1)
+    y_range = _K.arange(0, nr_of_categories, dtype=dtype)
+    return lambda y: _K.sum(_K.softmax(y * beta) * y_range, axis=-1)
 
 
 def tailed_categorical_crossentropy(nr_of_categories, alpha=0.1, beta=1e10, dtype='float32'):
@@ -19,4 +20,11 @@ def tailed_categorical_crossentropy(nr_of_categories, alpha=0.1, beta=1e10, dtyp
     :return: returns a keras loss function
     """
     argmax = differentiable_argmax(nr_of_categories, beta, dtype=dtype)
-    return lambda y_true, y_pred: alpha * (argmax(y_pred) - argmax(y_true)) ** 2
+
+    # custom loss function is cross entropy with penalized tail errors
+    def loss_function(y_true, y_pred):
+        penalty = alpha * (argmax(y_pred) - argmax(y_true)) ** 2
+        loss = categorical_crossentropy(y_true, y_pred)
+        return loss + penalty
+
+    return loss_function

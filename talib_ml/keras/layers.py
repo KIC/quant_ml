@@ -2,15 +2,17 @@ from collections import Callable
 
 import tensorflow as tf
 from keras import backend as K
+from keras.initializers import Constant
 from keras.layers import Layer
 
 
 class CurveFit(Layer):
 
-    def __init__(self, parameters: int, function: Callable, **kwargs):
+    def __init__(self, parameters: int, function: Callable, initializer='uniform', **kwargs):
         super().__init__(**kwargs)
         self.parameters = parameters
         self.function = function
+        self.initializer = initializer
 
     def build(self, input_shape):
         """
@@ -20,8 +22,8 @@ class CurveFit(Layer):
 
         # Create a trainable weight variable for this layer.
         self.kernel = self.add_weight(name='kernel',
-                                      shape=(self.parameters, ),
-                                      initializer='uniform',
+                                      shape=(self.parameters,),
+                                      initializer=self.initializer,
                                       trainable=True)
 
         # Be sure to call this at the end
@@ -53,7 +55,10 @@ class LPPLLayer(CurveFit):
     #  dtPm = dt ^ m
     #  A + B * dtPm + C * dtPm * cos(w * ln(dt) - phi)
     def __init__(self):
-        super().__init__(3, LPPLLayer.lppl)
+        super().__init__(3, LPPLLayer.lppl, Constant(0.5))
+
+    def get_tc(self):
+        return self.get_weights()[0][0]
 
     @staticmethod
     def lppl(x, args):
@@ -62,25 +67,28 @@ class LPPLLayer(CurveFit):
 
         N = K.constant(int(x.shape[-1]), dtype=x.dtype)
         t = K.arange(0, int(x.shape[-1]), 1, dtype=x.dtype)
+
+        # note that we need to get the variables to be centered around 0 so to correct the magnitude we offset them by constants
         tc = args[0] + N
         m = args[1]
-        w = args[2]
+        w = args[2] * K.constant(10, dtype=x.dtype)
 
         # and calculate the lppl with the given parameters
-        dt = (tc - t) if is_bubble else (t - tc)
-        abcc = LPPLLayer.matrix_equation(x, dt, m, w, N)
+        dt = (tc - t)  # if is_bubble else (t - tc)
+        dtPm = K.pow(dt, m)
+        dtln = K.log(dt)
+        abcc = LPPLLayer.matrix_equation(x, dtPm, dtln, w, N)
 
         a, b, c1, c2 = (abcc[0], abcc[1], abcc[2], abcc[3])
-        return a + K.pow(dt, m) * (b + ((c1 * K.cos(w * K.log(dt))) + (c2 * K.sin(w * K.log(dt)))))
+
+        # LPPL = A+B(tc −t)^m +C1(tc −t)^m cos(ω ln(tc −t)) +C2(tc −t)^m sin(ω ln(tc −t))
+        return a + b * dtPm + c1 * dtPm * K.cos(w * dtln) + c2 * dtPm * K.sin(w * dtln)
 
     @staticmethod
-    def matrix_equation(x, dt, m, w, N):
-        dtEm = K.pow(dt, m)
-        logdt = K.log(dt)
-
-        fi = dtEm
-        gi = dtEm * K.cos(w * logdt)
-        hi = dtEm * K.sin(w * logdt)
+    def matrix_equation(x, dtPm, dtln, w, N):
+        fi = dtPm
+        gi = dtPm * K.cos(w * dtln)
+        hi = dtPm * K.sin(w * dtln)
 
         fi_pow_2 = K.sum(fi * fi)
         gi_pow_2 = K.sum(gi * gi)
@@ -90,7 +98,8 @@ class LPPLLayer(CurveFit):
         fihi = K.sum(fi * hi)
         gihi = K.sum(gi * hi)
 
-        yi = K.log(x)
+        # note that our price is already a log price so we should not log it one more time
+        yi = x  # K.log(x)
         yifi = K.sum(yi * fi)
         yigi = K.sum(yi * gi)
         yihi = K.sum(yi * hi)
@@ -105,7 +114,7 @@ class LPPLLayer(CurveFit):
             K.stack([fi, fi_pow_2, figi, fihi]),
             K.stack([gi, figi, gi_pow_2, gihi]),
             K.stack([hi, fihi, gihi, hi_pow_2])
-        ])
+        ], axis=0)
 
         b = K.stack([yi, yifi, yigi, yihi])
 
