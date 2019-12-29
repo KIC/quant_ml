@@ -44,8 +44,10 @@ class TestKerasLayer(TestCase):
         x = ReScaler((x.min(), x.max()), (1, 2))(x)
         x = x.reshape(1, -1)
 
+        x2 = np.vstack([x, x])
+
         """when"""
-        model.fit(x, x, epochs=5000, verbose=0, callbacks=[EarlyStopping('loss')])
+        model.fit(x2, x2, epochs=5000, verbose=0, callbacks=[EarlyStopping('loss')])
 
         """then"""
         print(model.predict_on_batch(x))

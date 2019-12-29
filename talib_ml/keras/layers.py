@@ -62,23 +62,23 @@ class LPPLLayer(CurveFit):
 
     @staticmethod
     def lppl(x, args):
-        # later: check if OLS regression slope is >= 0 -> bubble detection or < 0 -> anti-bubble detection
-        is_bubble = True
-
         N = K.constant(int(x.shape[-1]), dtype=x.dtype)
         t = K.arange(0, int(x.shape[-1]), 1, dtype=x.dtype)
 
-        # note that we need to get the variables to be centered around 0 so to correct the magnitude we offset them by constants
-        tc = args[0] + N
+        # note that we need to get the variables to be centered around 0
+        # so to correct the magnitude we offset them by constants
+        # w just has a mangitude of 10s from empirical results
+        # for tc we apply a factor of 5 which should be interpreted as week
+        # a tc 0.5 means half a week in the future
+        tc = args[0] * K.constant(5, dtype=x.dtype) + N
         m = args[1]
         w = args[2] * K.constant(10, dtype=x.dtype)
 
-        # and calculate the lppl with the given parameters
-        dt = (tc - t)  # if is_bubble else (t - tc)
+        # then we calculate the lppl with the given parameters
+        dt = (tc - t)
         dtPm = K.pow(dt, m)
         dtln = K.log(dt)
         abcc = LPPLLayer.matrix_equation(x, dtPm, dtln, w, N)
-
         a, b, c1, c2 = (abcc[0], abcc[1], abcc[2], abcc[3])
 
         # LPPL = A+B(tc −t)^m +C1(tc −t)^m cos(ω ln(tc −t)) +C2(tc −t)^m sin(ω ln(tc −t))
