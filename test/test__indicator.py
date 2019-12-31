@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 from unittest import TestCase
 
@@ -18,14 +19,19 @@ class TestIndicators(TestCase):
         idx = pd.IndexSlice
         self.assertTrue(True)
 
-    def test__xxx(self):
-        cat = df.rolling(20).future_pct_of_mean(1).bucketize(10).tail()
-        oht = cat.one_hot_categories()
-        print(oht.tail())
+    def test__future_pct_of_mean(self):
+        """given"""
+        x = df[["Close"]]
 
-        y = oht[:1]
+        """when"""
+        x["sma"] = x.rolling(2).mean()
+        x["fpm"] = x["Close"].rolling(2).ta_future_pct_of_mean(1)
 
-        # decode back to percentage
-        y.one_hot_to_categories([cat[col].cat.categories for col in cat.columns])
-        self.assertTrue(True)
+        """then"""
+        print(f"\n{x.tail()}")
+        self.assertAlmostEqual(x["sma"].iloc[-2], 310.504990, 5)
+        self.assertAlmostEqual(x["Close"].iloc[-1], 312.089996, 5)
+        self.assertAlmostEqual(x["fpm"].iloc[-2], 312.089996 / 310.504990 - 1, 5)
+        self.assertAlmostEqual(x["sma"].iloc[-2] * (312.089996 / 310.504990), x["Close"].iloc[-1], 5)
+        self.assertTrue(np.isnan(x["fpm"].iloc[-1]))
 
