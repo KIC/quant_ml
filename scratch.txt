@@ -1,0 +1,87 @@
+from pandas_ml_utils.sampling.boosting import KEquallyWeightEvents
+from talib_ml.encoders import IntervalIndexEncoder
+from talib_ml.util import arange_open
+from talib_ml.categorize import percent_bucket_to_target
+from talib_ml.keras.loss import tailed_categorical_crossentropy
+from keras.models import Sequential
+from keras.layers import Dense, Reshape, ActivityRegularization
+from keras.callbacks import EarlyStopping
+from keras import backend as K
+import numpy as np
+import talib_ml as tml
+import talib
+
+
+# firs clear tensorflow session
+K.clear_session()
+
+# define the buckets
+# buckets = pd.IntervalIndex.from_breaks(np.arange(-0.15, 0.151, 0.02).round(2))
+buckets = pd.IntervalIndex.from_breaks(arange_open(-0.093, 0.093, 0.01, 3))
+
+# define cross validation
+cv = KEquallyWeightEvents(n_splits=3)
+
+
+# define the model provider
+def baseline_model():
+    # define custom loss
+    loss = tailed_categorical_crossentropy(len(buckets), alpha=1)
+
+    # create model
+    model = Sequential()
+    model.add(Reshape((280 * 9, ), input_shape=(280, 9)))
+    model.add(ActivityRegularization(l1=0.002))
+    model.add(Dense(60, activation='tanh'))
+    model.add(Dense(50, activation='tanh'))
+    model.add(Dense(len(buckets), activation='softmax'))
+
+    # Compile model
+    #model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss=loss, optimizer='adam', metrics=['accuracy'])
+    return model
+
+
+
+# define the model
+model = pmu.KerasModel(
+    baseline_model,
+    pmu.FeaturesAndLabels(
+        features=['macd', 'macd_signal', 'plus_di', 'mom', 'apo', 'atr', 'minus_dm', 'trix', 'plus_dm'],
+        labels=IntervalIndexEncoder("future_pnl", buckets),
+        targets=lambda f, _, fnl: fnl.labels.calculate_targets(f['sma']),
+        loss=lambda f: f["future_pnl"],
+        feature_lags=range(280),
+        pre_processor=lambda _df, kwargs: pmu.LazyDataFrame(_df,
+            # helper values
+            # iv= lambda df: iv_bands(df, ma_window, target_stddev, price="spy_Close", vola='vix_Close'),
+            #vola_hist30=lambda x: talib.STDDEV(x['qqq_Close']),
+            sma             = lambda df: df["Close"].rolling(14).mean(),
+            # features
+            macd            = lambda df: talib.MACD(df["Close"])[0] / 10,
+            macd_signal     = lambda df: talib.MACD(df["Close"])[1] / 10,
+            plus_di         = lambda df: talib.PLUS_DI(df["High"], df["Low"], df["Close"]) / 100,
+            mom             = lambda df: talib.MOM(df["Close"]) / 100,
+            apo             = lambda df: talib.APO(df["Close"]) / 10,
+            atr             = lambda df: talib.ATR(df["High"], df["Low"], df["Close"]) / 10,
+            minus_dm        = lambda df: talib.MINUS_DM(df["High"], df["Low"]) / 100,
+            trix            = lambda df: talib.TRIX(df["Close"]),
+            plus_dm         = lambda df: talib.PLUS_DM(df["High"], df["Low"]) / 100,
+
+            # labels
+            # NOTE: The logic is we shift the forecast into the future (t + forecast_timesteps) to check wheter the future price breaks the forecast or not.
+            #       But then we need to shift everything back to t as this needs to be the label of time t
+
+            future_pnl       = lambda df: df["Close"].rolling(14).ta_future_pct_of_mean(kwargs["forecasting_time_steps"])).to_dataframe(),
+        forecasting_time_steps=7),
+    callbacks=[EarlyStopping(monitor='val_loss')],
+    verbose=0,
+   )
+
+fit = df.fit(model,
+             test_size=0.4,
+             test_validate_split_seed=42,
+             cross_validation=(1, cv.split)
+            )
+
+fit.model.plot_loss()
