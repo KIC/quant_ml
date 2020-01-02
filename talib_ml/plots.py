@@ -1,5 +1,6 @@
 from typing import Tuple
 
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.axis import Axis
@@ -30,6 +31,9 @@ def plot_heated_stacked_area(df: pd.DataFrame,
         for xi in range(len(x)):
             plt.fill_between(x[xi-1:xi+1], y[xi-1:xi+1, ci], y[xi-1:xi+1, ci+1],
                              facecolors=color_function(c[xi-1:xi+1, ci]))
+
+        plt.annotate(f'{y[-1, ci]:.2f}', xy=(mdates.date2num(x[-1]), y[-1, ci]),
+                     xytext=(4, -4), textcoords='offset pixels')
 
     # reset limits
     if reset_y_lim:
