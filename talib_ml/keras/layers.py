@@ -13,12 +13,17 @@ class CurveFit(Layer):
         self.parameters = parameters
         self.function = function
         self.initializer = initializer
+        self.batch_size = None
+        self.kernel = None
 
     def build(self, input_shape):
         """
         parameters: pass the number of parameters of the function you try to fit
         function: pass the function you want to fit i.e. `lambda x, args: x * sum(args)`
         """
+
+        # set batch size
+        self.batch_size = input_shape[0]
 
         # Create a trainable weight variable for this layer.
         self.kernel = self.add_weight(name='kernel',
@@ -55,19 +60,18 @@ class LPPLLayer(CurveFit):
     #  dtPm = dt ^ m
     #  A + B * dtPm + C * dtPm * cos(w * ln(dt) - phi)
     def __init__(self):
-        super().__init__(3, LPPLLayer.lppl, Constant(0.5))
+        super().__init__(3, self.lppl, Constant(0.5))
 
     def get_tc(self):
         return self.get_weights()[0][0]
 
-    @staticmethod
-    def lppl(x, args):
+    def lppl(self, x, args):
         N = K.constant(int(x.shape[-1]), dtype=x.dtype)
         t = K.arange(0, int(x.shape[-1]), 1, dtype=x.dtype)
 
         # note that we need to get the variables to be centered around 0
         # so to correct the magnitude we offset them by constants
-        # w just has a mangitude of 10s from empirical results
+        # w just has a magnitude of 10s from empirical results
         # for tc we apply a factor of 5 which should be interpreted as week
         # a tc 0.5 means half a week in the future
         tc = args[0] * K.constant(5, dtype=x.dtype) + N

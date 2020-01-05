@@ -1,5 +1,8 @@
 pandas-ml-utils
 scikit-learn
+matplotlib
+mlxtend
+seaborn
 keras
 pandas
 numpy
