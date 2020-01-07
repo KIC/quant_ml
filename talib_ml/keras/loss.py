@@ -19,10 +19,10 @@ def tailed_categorical_crossentropy(nr_of_categories, alpha=0.1, beta=1e10, dtyp
     :param beta: used for the differentiable_argmax
     :return: returns a keras loss function
     """
-    argmax = differentiable_argmax(nr_of_categories, beta, dtype=dtype)
 
     # custom loss function is cross entropy with penalized tail errors
     def loss_function(y_true, y_pred):
+        argmax = differentiable_argmax(nr_of_categories, beta, dtype=dtype)
         penalty = alpha * (argmax(y_pred) - argmax(y_true)) ** 2
         loss = categorical_crossentropy(y_true, y_pred)
         return loss + penalty

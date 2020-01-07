@@ -19,9 +19,9 @@ class TradingSummary(Summary):
     def plot_ts_heatmap(self, loss_alpha=0.1, loss_color="white", loss_width=0.25, figsize=(34, 8)) -> plt.Figure:
         fig = plt.figure(figsize=figsize)
         plt.pcolormesh(self.df.index, self.df[PREDICTION_COLUMN_NAME].columns, self.df[PREDICTION_COLUMN_NAME].T)
-        if LOSS_COLUMN_NAME in self.df.columns:
-            ax2 = self.df[LOSS_COLUMN_NAME].plot(color=loss_color, alpha=loss_alpha, linewidth=loss_width,
-                                                 secondary_y=True)
+        if GROSS_LOSS_COLUMN_NAME in self.df.columns:
+            ax2 = self.df[GROSS_LOSS_COLUMN_NAME].plot(color=loss_color, alpha=loss_alpha, linewidth=loss_width,
+                                                       secondary_y=True)
             # fixme find range from targets ..
             ax2.set_ylim(-0.09, 0.09)
 
