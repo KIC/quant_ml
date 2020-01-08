@@ -1,10 +1,13 @@
 from keras import backend as _K
 from keras.losses import categorical_crossentropy
 
+from talib_ml.util import LazyInit
+
 
 def differentiable_argmax(nr_of_categories, beta=1e10, dtype='float32'):
-    y_range = _K.arange(0, nr_of_categories, dtype=dtype)
-    return lambda y: _K.sum(_K.softmax(y * beta) * y_range, axis=-1)
+    # need to lazy initialized as it needs to be in the same keras session
+    y_range = LazyInit(lambda: _K.arange(0, nr_of_categories, dtype=dtype))
+    return lambda y: _K.sum(_K.softmax(y * beta) * y_range(), axis=-1)
 
 
 def tailed_categorical_crossentropy(nr_of_categories, alpha=0.1, beta=1e10, dtype='float32'):

@@ -28,3 +28,18 @@ def arange_open(start, stop, step, round=None):
         arr[-1] = float('inf')
 
     return arr if round is None else arr.round(round)
+
+
+class LazyInit(object):
+
+    def __init__(self, supplier):
+        self.supplier = supplier
+        self.init = True
+
+    def __call__(self, *args, **kwargs):
+        if self.init:
+            self.supplier = self.supplier()
+            self.init = False
+
+        return self.supplier
+
