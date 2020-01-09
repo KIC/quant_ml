@@ -41,6 +41,16 @@ def future_pct_of_mean(df: _pd.DataFrame, lag: int = 1):
     return (most_recent / mean) - 1
 
 
+def cross_over(df: _pd.DataFrame, a, b):
+    old = df.apply(lambda x: x[0])
+    young = df.apply(lambda x: x[-1])
+    return (old[a] <= old[b]) & (young[a] > young[b])
+
+
+def cross_under(df: _pd.DataFrame, a, b):
+    return cross_over(df, b, a)
+
+
 # TODO implement this indicators and test them against ta-lib
 #                                macd            = lambda df: talib.MACD(df["Close"])[0] / 10,
 #                                macd_signal     = lambda df: talib.MACD(df["Close"])[1] / 10,

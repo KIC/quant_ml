@@ -18,7 +18,7 @@ def plot_heat_bar(df: pd.DataFrame, prediction_columns, target_columns) -> Tuple
     targets = df[target_columns].values[-1, :len(probabilities)].round(2)
     date = df.index[-1]
 
-    fig, sns.heatmap(pd.DataFrame({f"probability\n{date}": probabilities}, index=targets).iloc[::-1])
+    return fig, sns.heatmap(pd.DataFrame({f"probability\n{date}": probabilities}, index=targets).iloc[::-1])
 
 
 def plot_heated_stacked_area(df: pd.DataFrame,
