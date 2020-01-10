@@ -1,6 +1,6 @@
 import pandas as pd
 
-from talib_ml.encoders import IntervalIndexEncoder
+from talib_ml.discrete.encoders import IntervalIndexEncoder
 from talib_ml.util import arange_open
 
 

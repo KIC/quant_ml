@@ -3,7 +3,7 @@ __version__ = '0.0.1'
 
 from pandas.core.base import PandasObject
 from talib_ml.indicator import *
-from talib_ml.categorize import *
+from talib_ml.discrete.categorize import *
 
 PandasObject.ta_bbands = bbands
 PandasObject.ta_future_pct_of_mean = future_pct_of_mean

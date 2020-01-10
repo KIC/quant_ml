@@ -40,6 +40,6 @@ class TestKerasLoss(TestCase):
         res3 = np.array([K.eval(loss(K.variable(one_hot(truth3, args)), K.variable(one_hot(i, args)))) for i in range(args)])
 
         """then"""
-        np.testing.assert_array_almost_equal(res1, np.array([ 10.,   0.,  10.,  40.,  90., 160., 250., 360., 490., 640., 810.]))
-        np.testing.assert_array_almost_equal(res2, np.array([250., 160.,  90.,  40.,  10.,   0.,  10.,  40.,  90., 160., 250.]))
-        np.testing.assert_array_almost_equal(res3, np.array([1000.,  810.,  640.,  490.,  360.,  250.,  160.,   90.,   40., 10.,    0.]))
+        np.testing.assert_array_almost_equal(res1, np.array([ 10.,   0.,  10.,  40.,  90., 160., 250., 360., 490., 640., 810.]), 5)
+        np.testing.assert_array_almost_equal(res2, np.array([250., 160.,  90.,  40.,  10.,   0.,  10.,  40.,  90., 160., 250.]), 5)
+        np.testing.assert_array_almost_equal(res3, np.array([1000.,  810.,  640.,  490.,  360.,  250.,  160.,   90.,   40., 10.,    0.]), 5)

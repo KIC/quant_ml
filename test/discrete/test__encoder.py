@@ -6,10 +6,10 @@ from sklearn.neural_network import MLPClassifier
 
 import pandas_ml_utils as pmu
 import talib_ml as tml
-from talib_ml.encoders import IntervalIndexEncoder
+from talib_ml.discrete.encoders import IntervalIndexEncoder
 
 # read testdata
-df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "SPY.csv"), index_col='Date')
+df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "SPY.csv"), index_col='Date')
 print(tml.__version__)
 
 
