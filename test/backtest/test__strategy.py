@@ -34,5 +34,5 @@ class TestStrategy(TestCase):
 
         """then"""
         print()
-        print(strategy.backtest())
-        self.assertEqual(strategy.backtest(), None)
+        print(strategy.backtest("Close"))
+        self.assertEqual(strategy.backtest(""), None)

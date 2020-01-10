@@ -3,6 +3,8 @@ from typing import Callable
 import pandas as pd
 import numpy as np
 
+from talib_ml.aggregate.aggregator import max_draw_down
+
 
 class Signal(object):
     pass
@@ -56,7 +58,12 @@ class Strategy(object):
         self.df = df
         self.signal = Position(signal)
 
-    def backtest(self) -> pd.DataFrame:
+    def backtest(self, price_column) -> pd.DataFrame:
         trades = self.df.apply(self.signal, axis=1, raw=False, result_type='expand')
         trades.columns = ["position_id", "quantity"]
-        return self.df.join(trades)
+        data = self.df.join(trades).dropna()
+
+        return data.groupby("position_id").agg({
+            price_column: ["mean", max_draw_down]
+
+        })
