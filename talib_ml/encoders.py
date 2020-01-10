@@ -61,5 +61,14 @@ class IntervalIndexEncoder(TargetLabelEncoder):
     def decode(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.ta_one_hot_to_categories([self.buckets])
 
+    def rescale(self, factor):
+        borders = self.buckets.values.to_tuples()
+        new_borders = [(left * factor, right * factor) for left, right in borders]
+
+        return IntervalIndexEncoder(
+            self.label_column,
+            pd.IntervalIndex.from_tuples(new_borders),
+            self.target_operator)
+
     def __len__(self):
         return len(self.buckets)
