@@ -3,7 +3,7 @@ from typing import Callable
 import pandas as pd
 import numpy as np
 
-from talib_ml.aggregate.aggregator import max_draw_down
+from talib_ml.aggregate.aggregator import max_draw_down, profit_and_loss, max_peak, range_label, pct_std
 
 
 class Signal(object):
@@ -62,8 +62,9 @@ class Strategy(object):
         trades = self.df.apply(self.signal, axis=1, raw=False, result_type='expand')
         trades.columns = ["position_id", "quantity"]
         data = self.df.join(trades).dropna()
+        data["date"] = data.index
 
         return data.groupby("position_id").agg({
-            price_column: ["mean", max_draw_down]
-
+            "date": range_label,
+            price_column: ["count", max_draw_down, profit_and_loss, max_peak, pct_std]
         })

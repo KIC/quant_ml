@@ -1,10 +1,11 @@
-from typing import Tuple
+from typing import Tuple, List
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib import gridspec
 from matplotlib.axis import Axis
 from matplotlib.figure import Figure
 from mlxtend.evaluate import confusion_matrix
@@ -97,3 +98,34 @@ def plot_ROC(df: pd.DataFrame, true_columns, predicted_columns) -> Tuple[Figure,
     plt.legend(loc="lower right")
     return fig, axis
 
+
+def ts_bar(df: pd.DataFrame, figsize=(16,9), width=2) -> Tuple[Figure, Axis]:
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.bar(df.index, df, width=width)
+    ax.xaxis_date()
+
+    return fig, ax
+
+
+def plot_strategy_statistics(df: pd.DataFrame, figsize=(21, 9), bins=10) -> Tuple[Figure, List[Axis]]:
+    # "count", max_draw_down, profit_and_loss, max_peak, pct_std
+    # i want 2 plots the distribution (histogram) of the pnl as well as each trade pnl as bar plot along with its max
+    # draw down
+
+    fig = plt.figure(figsize=figsize)
+    axis = []
+    grid = (1, 3)
+    gridspec.GridSpec(*grid)
+
+    ax = plt.subplot2grid(grid, (0, 0))
+    df.loc[:, (slice(None), "profit_and_loss")].hist(ax=ax, bins=bins)
+    axis.append(ax)
+
+    ax = plt.subplot2grid(grid, (0, 1), colspan=2)
+    ax.bar(df.index, df.loc[:, (slice(None), "max_draw_down")].values[:, 0], color='C1', label="max draw down")
+    ax.bar(df.index, df.loc[:, (slice(None), "profit_and_loss")].values[:, 0], color='C0', label="PnL")
+    ax.legend()
+    ax.autoscale(tight=True)
+    axis.append(ax)
+
+    return fig, axis
