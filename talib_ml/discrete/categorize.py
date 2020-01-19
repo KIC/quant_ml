@@ -7,7 +7,7 @@ from typing import Iterable, Union
 from talib_ml.util import one_hot, unique
 
 
-def bucketize(df: _pd.DataFrame, rrange: Union[_pd.IntervalIndex, Iterable, int], closed: bool = False):
+def ta_bucketize(df: _pd.DataFrame, rrange: Union[_pd.IntervalIndex, Iterable, int], closed: bool = False):
     if isinstance(rrange, _pd.IntervalIndex):
         buckets = rrange
     elif isinstance(rrange, Iterable):

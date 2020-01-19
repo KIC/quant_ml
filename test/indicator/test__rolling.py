@@ -1,27 +1,18 @@
-import os
-import numpy as np
-import pandas as pd
 from unittest import TestCase
 
+import numpy as np
+
 import talib_ml as tml
+from test import DF_TEST
 
-
-df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "SPY.csv"), index_col='Date')
 print(tml.__version__)
 
 
 class TestIndicators(TestCase):
 
-    def test__bbands(self):
-        res = df.rolling(20).bbands()
-        print(res)
-
-        idx = pd.IndexSlice
-        self.assertTrue(True)
-
     def test__future_pct_of_mean(self):
         """given"""
-        x = df[["Close"]]
+        x = DF_TEST[["Close"]]
 
         """when"""
         x["sma"] = x.rolling(2).mean()
