@@ -48,7 +48,7 @@ def ta_trix(df: PANDAS, period=30):
     return ta_ema(ta_ema(ta_ema(df, period), period), period).pct_change() * 100
 
 
-def ta_tr(df: PANDAS, high="High", low="Low", close="Close", relative=True):
+def ta_tr(df: PANDAS, high="High", low="Low", close="Close", relative=False):
     h = df[high]
     l = df[low]
     c = df[close].shift(1)
@@ -65,7 +65,7 @@ def ta_tr(df: PANDAS, high="High", low="Low", close="Close", relative=True):
     return ranges.max(axis=1).rename("true_range")
 
 
-def ta_atr(df: PANDAS, period=14, high="High", low="Low", close="Close", relative=True, exponential='wilder'):
+def ta_atr(df: PANDAS, period=14, high="High", low="Low", close="Close", relative=False, exponential='wilder'):
     if exponential is True:
         return ta_ema(ta_tr(df, high, low, close, relative), period)
     if exponential == 'wilder':
@@ -73,7 +73,22 @@ def ta_atr(df: PANDAS, period=14, high="High", low="Low", close="Close", relativ
     else:
         return ta_sma(ta_tr(df, high, low, close, relative), period)
 
-# +/- DMI https://www.investopedia.com/terms/d/dmi.asp
-#                                plus_di         = lambda df: talib.PLUS_DI(df["High"], df["Low"], df["Close"]) / 100,
-#                                minus_dm        = lambda df: talib.MINUS_DM(df["High"], df["Low"]) / 100,
-#                                plus_dm         = lambda df: talib.PLUS_DM(df["High"], df["Low"]) / 100,
+
+def ta_adx(df: PANDAS, period=14, high="High", low="Low", close="Close"):
+    smooth = period * 2 - 1
+
+    temp = _pd.DataFrame({
+        "up": df[high] - df[high].shift(1),
+        "down": df[low].shift(1) - df[low]
+    }, index=df.index)
+
+    atr = ta_atr(df, period, high, low, close, relative=False)
+    pdm = ta_ema(temp.apply(lambda r: r[0] if r["up"] > r["down"] and r["up"] > 0 else 0, raw=False, axis=1), smooth)
+    ndm = ta_ema(temp.apply(lambda r: r[1] if r["down"] > r["up"] and r["down"] > 0 else 0, raw=False, axis=1), smooth)
+
+    pdi = pdm / atr
+    ndi = ndm / atr
+    adx = ta_ema((pdi - ndi).abs() / (pdi + ndi).abs(), smooth)
+
+    return _pd.DataFrame({"+DM": pdm, "-DM": ndm, "+DI": pdi, "-DI": ndi, "ADX": adx}, index=df.index)
+

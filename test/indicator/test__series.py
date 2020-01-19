@@ -52,3 +52,19 @@ class TestSeriesIndicator(TestCase):
 
         np.testing.assert_array_almost_equal(me, ta)
 
+    def test__adx(self):
+        me = ta_adx(DF_TEST)[-100:]
+        ta_pdi = talib.PLUS_DI(DF_TEST["High"], DF_TEST["Low"], DF_TEST["Close"])[-100:]
+        ta_mdi = talib.MINUS_DI(DF_TEST["High"], DF_TEST["Low"], DF_TEST["Close"])[-100:]
+
+        ta_pdm = talib.PLUS_DM(DF_TEST["High"], DF_TEST["Low"])[-100:]
+        ta_mdm = talib.MINUS_DM(DF_TEST["High"], DF_TEST["Low"])[-100:]
+        ta_dx = talib.ADX(DF_TEST["High"], DF_TEST["Low"], DF_TEST["Close"])[-100:]
+
+        np.testing.assert_array_almost_equal(me["ADX"], ta_dx / 100)
+        np.testing.assert_array_almost_equal(me["+DI"], ta_pdi / 100)
+        np.testing.assert_array_almost_equal(me["-DI"], ta_mdi / 100)
+        np.testing.assert_array_almost_equal(me["+DM"], ta_pdm) # FIXME
+        np.testing.assert_array_almost_equal(me["-DM"], ta_mdm) # FIXME
+
+
