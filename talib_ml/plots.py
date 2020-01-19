@@ -13,13 +13,31 @@ from mlxtend.plotting import plot_confusion_matrix
 from sklearn.metrics import roc_curve, auc
 
 
-def plot_heat_bar(df: pd.DataFrame, prediction_columns, target_columns) -> Tuple[Figure, Axis]:
+def plot_heat_bar(df: pd.DataFrame, prediction_columns, target_columns, density=0.01) -> Tuple[Figure, Axis]:
     fig, ax = plt.subplots(figsize=(2, 9))
     probabilities = df[prediction_columns].values[-1]
     targets = df[target_columns].values[-1, :len(probabilities)].round(2)
     date = df.index[-1]
 
-    return fig, sns.heatmap(pd.DataFrame({f"probability\n{date}": probabilities}, index=targets).iloc[::-1])
+    data = pd.DataFrame({f"probability\n{date}": probabilities}, index=targets).iloc[::-1]
+    max_in_each_column = np.max(data.values)
+
+    print(f"density: {(probabilities > 0.01).sum()}")
+
+    # plot the whole heat map
+    sns.heatmap(data,
+                mask=(data == max_in_each_column),
+                annot=True,
+                cbar=False,
+                fmt=".2f")
+
+    # plot the max cell with special annotation
+    return fig, sns.heatmap(data,
+                            mask=(data != max_in_each_column),
+                            annot_kws={"weight": "bold", "c": "blue"},
+                            annot=True,
+                            fmt=".2f")
+
 
 
 def plot_heated_stacked_area(df: pd.DataFrame,
