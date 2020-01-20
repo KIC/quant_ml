@@ -67,4 +67,13 @@ class TestSeriesIndicator(TestCase):
         np.testing.assert_array_almost_equal(me["+DM"], ta_pdm) # FIXME
         np.testing.assert_array_almost_equal(me["-DM"], ta_mdm) # FIXME
 
+    def test__bbands(self):
+        me = ta_bbands(DF_TEST["Close"], ddof=0)[-100:]
+        u, m, l = talib.BBANDS(DF_TEST["Close"])
+        u = u[-100:]
+        m = m[-100:]
+        l = l[-100:]
 
+        np.testing.assert_array_almost_equal(me["mean"], m)
+        np.testing.assert_array_almost_equal(me["upper"], u)
+        np.testing.assert_array_almost_equal(me["lower"], l)
