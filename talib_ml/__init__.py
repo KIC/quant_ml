@@ -13,9 +13,6 @@ for indicator in dir(indicators):
 
 # FIXME move to series
 PandasObject.ta_future_pct_of_mean = ta_future_pct_of_mean
-PandasObject.ta_cross_over = ta_cross_over
-PandasObject.ta_cross_under = ta_cross_under
-
 PandasObject.ta_bucketize = ta_bucketize
 
 # todo better prefix

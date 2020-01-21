@@ -77,3 +77,9 @@ class TestSeriesIndicator(TestCase):
         np.testing.assert_array_almost_equal(me["mean"], m)
         np.testing.assert_array_almost_equal(me["upper"], u)
         np.testing.assert_array_almost_equal(me["lower"], l)
+
+    def test__crossover(self):
+        mean = DF_TEST["Close"].rolling(20).mean()
+        co = ta_cross_over(DF_TEST, "Close", mean)
+
+        self.assertTrue(co[-2:].values[0])

@@ -2,6 +2,8 @@ import pandas as _pd
 from typing import Union as _Union
 
 # create convenient type hint
+from pandas.core.base import PandasObject
+
 _PANDAS = _Union[_pd.DataFrame, _pd.Series]
 
 
@@ -118,4 +120,16 @@ def ta_bbands(df: _PANDAS, period=5, stddev=2.0, ddof=1):
         .join(lower) \
         .join(z_score) \
         .sort_index(axis=1)
+
+
+def ta_cross_over(df: _pd.DataFrame, a, b, period=1):
+    old_a = (a if isinstance(a, PandasObject) else df[a]).shift(period)
+    old_b = (b if isinstance(b, PandasObject) else df[b]).shift(period)
+    young_a = (a if isinstance(a, PandasObject) else df[a])
+    young_b = (b if isinstance(b, PandasObject) else df[b])
+    return (old_a <= old_b) & (young_a > young_b)
+
+
+def ta_cross_under(df: _pd.DataFrame, a, b):
+    return ta_cross_over(df, b, a)
 
