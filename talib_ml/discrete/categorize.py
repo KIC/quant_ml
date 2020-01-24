@@ -60,7 +60,7 @@ def index_of_categories(df: _pd.DataFrame):
         raise ValueError(f"unsupported type {type(df)}")
 
 
-def one_hot_categories(df: _pd.DataFrame):
+def ta_one_hot_categories(df: _pd.DataFrame):
     indexes = index_of_categories(df)
     df = df.to_frame() if isinstance(df, _pd.Series) else df
     res = None
