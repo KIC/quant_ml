@@ -4,11 +4,11 @@ import numpy as np
 import pandas as pd
 import talib
 
-from talib_ml.indicator.series import *
+from talib_ml.indicator.features import *
 from test import DF_TEST, DF_DEBUG
 
 
-class TestSeriesIndicator(TestCase):
+class TestIndicator(TestCase):
 
     def test__ema(self):
         me = ta_ema(DF_TEST["Close"], 20)[-100:]
@@ -25,6 +25,12 @@ class TestSeriesIndicator(TestCase):
     def test__mom(self):
         me = ta_mom(DF_TEST["Close"])[-100:]
         ta = talib.MOM(DF_TEST["Close"])[-100:]
+
+        np.testing.assert_array_almost_equal(me, ta)
+
+    def test__stddev(self):
+        me = ta_stddev(DF_TEST["Close"], ddof=0)[-100:]
+        ta = talib.STDDEV(DF_TEST["Close"])[-100:]
 
         np.testing.assert_array_almost_equal(me, ta)
 
@@ -83,3 +89,4 @@ class TestSeriesIndicator(TestCase):
         co = ta_cross_over(DF_TEST, "Close", mean)
 
         self.assertTrue(co[-2:].values[0])
+

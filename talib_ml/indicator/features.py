@@ -40,6 +40,10 @@ def ta_roc(df: _PANDAS, period=10):
     return df.pct_change(period)
 
 
+def ta_stddev(df: _PANDAS, period=5, nbdev=1, ddof=1):
+    return df.rolling(period).std(ddof=ddof) * nbdev
+
+
 def ta_apo(df: _PANDAS, fast_period=12, slow_period=26, exponential=False):
     fast = ta_ema(df, fast_period) if exponential else ta_sma(df, fast_period)
     slow = ta_ema(df, slow_period) if exponential else ta_sma(df, slow_period)
@@ -132,4 +136,5 @@ def ta_cross_over(df: _pd.DataFrame, a, b, period=1):
 
 def ta_cross_under(df: _pd.DataFrame, a, b):
     return ta_cross_over(df, b, a)
+
 

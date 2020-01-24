@@ -1,11 +1,11 @@
 from unittest import TestCase
 
 import numpy as np
+import pandas as pd
+import talib
 
-import talib_ml as tml
-from test import DF_TEST
-
-print(tml.__version__)
+from talib_ml.indicator.labels import *
+from test import DF_TEST, DF_DEBUG
 
 
 class TestIndicators(TestCase):
@@ -16,7 +16,7 @@ class TestIndicators(TestCase):
 
         """when"""
         x["sma"] = x.rolling(2).mean()
-        x["fpm"] = x["Close"].rolling(2).ta_future_pct_of_mean(1)
+        x["fpm"] = ta_future_pct_of_mean(x["Close"], 2, 1)
 
         """then"""
         print(f"\n{x.tail()}")

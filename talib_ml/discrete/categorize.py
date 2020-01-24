@@ -7,7 +7,15 @@ from typing import Iterable, Union
 from talib_ml.util import one_hot, unique
 
 
-def ta_bucketize(df: _pd.DataFrame, rrange: Union[_pd.IntervalIndex, Iterable, int], closed: bool = False):
+def ta_convolution(df: _pd.DataFrame, period=90, buckets=10):
+    # TODO take all columns of the data frame and transform them into a 2D array where the columns are one hot encoded
+    #   trading days
+    pass
+
+
+def ta_bucketize(df: _pd.DataFrame,
+                 rrange: Union[_pd.IntervalIndex, Iterable, int],
+                 closed: bool = False) -> _pd.DataFrame:
     if isinstance(rrange, _pd.IntervalIndex):
         buckets = rrange
     elif isinstance(rrange, Iterable):
@@ -24,9 +32,9 @@ def ta_bucketize(df: _pd.DataFrame, rrange: Union[_pd.IntervalIndex, Iterable, i
 
     # cut each column and return the index
     if isinstance(df, _pd.DataFrame):
-        return  _pd.DataFrame({col: _pd.cut(df[col], buckets) for col in df.columns}, index=df.index)
+        return _pd.DataFrame({col: _pd.cut(df[col], buckets) for col in df.columns}, index=df.index)
     elif isinstance(df, _pd.Series):
-        return  _pd.DataFrame({df.name: _pd.cut(df, buckets)}, index=df.index)
+        return _pd.DataFrame({df.name: _pd.cut(df, buckets)}, index=df.index)
     else:
         raise ValueError(f"unsupported type {type(df)}")
 

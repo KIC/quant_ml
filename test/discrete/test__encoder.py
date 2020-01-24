@@ -24,7 +24,7 @@ class TestEncoder(TestCase):
         buckets = pd.IntervalIndex.from_breaks([-float("inf"), -0.05, 0.0, 0.05, float("inf")])
 
         """and a model"""
-        model = pmu.SkitModel(
+        model = pmu.SkModel(
             MLPClassifier(activation='tanh', hidden_layer_sizes=(60, 50), random_state=42),
             pmu.FeaturesAndLabels(features=['sma_ratio'],
                                   labels=IntervalIndexEncoder("forward_sma_ratio", buckets)))
