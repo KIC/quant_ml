@@ -1,8 +1,8 @@
 from unittest import TestCase
 from keras import backend as K
 
-from talib_ml import one_hot
-from talib_ml.keras.loss import tailed_categorical_crossentropy, differentiable_argmax
+from quant_ml import one_hot
+from quant_ml.keras.loss import tailed_categorical_crossentropy, differentiable_argmax
 import numpy as np
 
 import pandas as pd

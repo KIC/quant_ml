@@ -1,11 +1,11 @@
 from unittest import TestCase
 import pandas_ml_utils as pmu
-import talib_ml as tml
+import quant_ml as tml
 import pandas as pd
 import os
 
 # read testdata
-from talib_ml.backtest.strategy import Strategy, Open, Close
+from quant_ml.backtest.strategy import Strategy, Open, Close
 
 df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "SPY.csv"), index_col='Date')
 print(tml.__version__)

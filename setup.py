@@ -1,15 +1,15 @@
 from setuptools import setup
 
 setup(
-   name='talib-ml',
+   name='quant-ml',
    version='0.0.0',
    author='KIC',
    author_email='',
-   packages=['talib_ml'],
+   packages=['quant_ml'],
    scripts=[],
    url='',
    license='',
-   description='An awesome package that does something',
+   description='re-implementation of TA-Lib suitable to pandas-ml-utils',
    long_description='', # open('README.txt').read(),
    install_requires=open("requirements.txt").read().splitlines(),
 )

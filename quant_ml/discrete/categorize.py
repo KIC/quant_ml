@@ -4,7 +4,7 @@ import pandas as _pd
 import numpy as _np
 from typing import Iterable, Union
 
-from talib_ml.util import one_hot, unique
+from quant_ml.util import one_hot, unique
 
 
 def ta_convolution(df: _pd.DataFrame, period=90, buckets=10):

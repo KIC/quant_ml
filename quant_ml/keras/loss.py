@@ -1,7 +1,7 @@
 from keras import backend as _K
 from keras.losses import categorical_crossentropy
 
-from talib_ml.util import LazyInit
+from quant_ml.util import LazyInit
 
 
 def differentiable_argmax(nr_of_categories, beta=1e10, dtype='float32'):

@@ -8,7 +8,7 @@ from keras.callbacks import EarlyStopping
 from keras.optimizers import SGD
 
 from pandas_ml_utils.utils.classes import ReScaler
-from talib_ml.keras.layers import LinearRegressionLayer, LPPLLayer
+from quant_ml.keras.layers import LinearRegressionLayer, LPPLLayer
 from sklearn.preprocessing import MinMaxScaler
 
 import pandas_ml_utils as pmu

@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 from unittest import TestCase
 
-import talib_ml as tml
-from talib_ml.aggregate.aggregator import max_draw_down
+import quant_ml as tml
+from quant_ml.aggregate.aggregator import max_draw_down
 
 #df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "SPY.csv"), index_col='Date')
 print(tml.__version__)

@@ -5,7 +5,7 @@ from typing import List, Any, Callable
 import numpy as np
 import pandas as pd
 
-import talib_ml as tml
+import quant_ml as tml
 from pandas_ml_utils.model.features_and_labels.target_encoder import TargetLabelEncoder
 
 tml.__version__

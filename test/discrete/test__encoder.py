@@ -5,8 +5,8 @@ import pandas as pd
 from sklearn.neural_network import MLPClassifier
 
 import pandas_ml_utils as pmu
-import talib_ml as tml
-from talib_ml.discrete.encoders import IntervalIndexEncoder
+import quant_ml as tml
+from quant_ml.discrete.encoders import IntervalIndexEncoder
 
 # read testdata
 df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "SPY.csv"), index_col='Date')

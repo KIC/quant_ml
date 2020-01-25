@@ -3,7 +3,7 @@ from typing import Callable
 import pandas as pd
 import numpy as np
 
-from talib_ml.aggregate.aggregator import max_draw_down, profit_and_loss, max_peak, range_label, pct_std
+from quant_ml.aggregate.aggregator import max_draw_down, profit_and_loss, max_peak, range_label, pct_std
 
 
 class Signal(object):

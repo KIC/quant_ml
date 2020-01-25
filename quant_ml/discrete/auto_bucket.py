@@ -1,7 +1,7 @@
 import pandas as pd
 
-from talib_ml.discrete.encoders import IntervalIndexEncoder
-from talib_ml.util import arange_open
+from quant_ml.discrete.encoders import IntervalIndexEncoder
+from quant_ml.util import arange_open
 
 
 def estimate_option_chain(label_column: str,
