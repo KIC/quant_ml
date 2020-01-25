@@ -5,10 +5,10 @@ from typing import List, Any, Callable
 import numpy as np
 import pandas as pd
 
-import quant_ml as tml
+import quant_ml as qml
 from pandas_ml_utils.model.features_and_labels.target_encoder import TargetLabelEncoder
 
-tml.__version__
+qml.__version__
 
 
 class IntervalIndexEncoder(TargetLabelEncoder):

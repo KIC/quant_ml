@@ -3,11 +3,11 @@ import numpy as np
 import pandas as pd
 from unittest import TestCase
 
-import quant_ml as tml
+import quant_ml as qml
 from quant_ml.aggregate.aggregator import max_draw_down
 
 #df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "SPY.csv"), index_col='Date')
-print(tml.__version__)
+print(qml.__version__)
 
 
 class TestAggregator(TestCase):

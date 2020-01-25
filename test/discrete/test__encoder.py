@@ -5,12 +5,12 @@ import pandas as pd
 from sklearn.neural_network import MLPClassifier
 
 import pandas_ml_utils as pmu
-import quant_ml as tml
+import quant_ml as qml
 from quant_ml.discrete.encoders import IntervalIndexEncoder
 
 # read testdata
 df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "SPY.csv"), index_col='Date')
-print(tml.__version__)
+print(qml.__version__)
 
 
 class TestEncoder(TestCase):

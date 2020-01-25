@@ -1,7 +1,7 @@
 from unittest import TestCase
 from keras import backend as K
 
-from quant_ml import one_hot
+from quant_ml.util import one_hot
 from quant_ml.keras.loss import tailed_categorical_crossentropy, differentiable_argmax
 import numpy as np
 

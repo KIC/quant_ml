@@ -1,6 +1,6 @@
 from unittest import TestCase
 import pandas_ml_utils as pmu
-import quant_ml as tml
+import quant_ml as qml
 import pandas as pd
 import os
 
@@ -8,7 +8,7 @@ import os
 from quant_ml.backtest.strategy import Strategy, Open, Close
 
 df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "SPY.csv"), index_col='Date')
-print(tml.__version__)
+print(qml.__version__)
 
 
 class TestStrategy(TestCase):
@@ -18,8 +18,8 @@ class TestStrategy(TestCase):
         backtest_df = pmu.LazyDataFrame(df[["Close"]],
                                         sma1=lambda df: df["Close"].rolling(20).mean(),
                                         sma2=lambda df: df["Close"].rolling(50).mean(),
-                                        buy=lambda df: df.rolling(2).ta_cross_over("sma1", "sma2"),
-                                        sell=lambda df: df.rolling(2).ta_cross_under("sma1", "sma2"))
+                                        buy=lambda df: df.ta_cross_over("sma1", "sma2"),
+                                        sell=lambda df: df.ta_cross_under("sma1", "sma2"))
 
         def signal(row):
             if row["buy"]:

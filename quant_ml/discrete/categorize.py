@@ -4,7 +4,7 @@ import pandas as _pd
 import numpy as _np
 from typing import Iterable, Union
 
-from quant_ml.util import one_hot, unique
+import quant_ml.util as util
 
 
 def ta_convolution(df: _pd.DataFrame, period=90, buckets=10):
@@ -68,7 +68,7 @@ def ta_one_hot_categories(df: _pd.DataFrame):
     for col in df.columns:
         categories = [str(cat) for cat in df[col].cat.categories]
         l = len(categories)
-        ohdf = indexes[[col]].apply(lambda c: one_hot(c, l), axis=1, result_type='expand')
+        ohdf = indexes[[col]].apply(lambda c: util.one_hot(c, l), axis=1, result_type='expand')
         ohdf.columns = _pd.MultiIndex.from_product([[col], categories])
 
         res = ohdf if res is None else res.join(ohdf)
@@ -82,7 +82,7 @@ def one_hot_to_categories(df: _pd.DataFrame, categories):
     for l in range(len(categories)):
         if df.columns.nlevels > 1:
             cat = categories[l]
-            name = unique(df.columns.get_level_values(0))[l]
+            name = util.unique(df.columns.get_level_values(0))[l]
             dat = df[name]
         else:
             cat = categories
