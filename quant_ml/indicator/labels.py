@@ -28,5 +28,5 @@ def ta_future_macd_cross(df: _pd.Series, forecast_period=14, fast_period=12, slo
     # calculate all macd crossings
     macd = _i.ta_macd(df, fast_period=fast_period, slow_period=slow_period, signal_period=signal_period)
     zero = macd["histogram"] * 0
-    cross = _i.ta_cross_over(macd["histogram"], zero) | _i.ta_cross_under(macd["histogram"], zero)
+    cross = _i.ta_cross_over(None, macd["histogram"], zero) | _i.ta_cross_under(None, macd["histogram"], zero)
     return cross.shift(-forecast_period)

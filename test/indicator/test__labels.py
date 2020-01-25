@@ -37,5 +37,8 @@ class TestIndicators(TestCase):
         self.assertTrue(future_cross.iloc[-5])
 
     def test__future_macd_cross(self):
-        #FIXME
-        pass
+        cross = ta_macd(DF_TEST["Close"], 3, 5, 2)
+        fcross = ta_future_macd_cross(DF_TEST["Close"], 2, 3, 5, 2)
+
+        self.assertTrue(fcross.iloc[-3])
+
