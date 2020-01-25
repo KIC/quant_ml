@@ -1,8 +1,9 @@
 pandas-ml-utils
 scikit-learn
 matplotlib
+tensorflow==1.14.0
 mlxtend
 seaborn
-keras
 pandas
+keras
 numpy
