@@ -217,20 +217,10 @@ real = AROONOSC(high, low, timeperiod=14)
 Learn more about the Aroon Oscillator at tadoc.org.
 
 CMO - Chande Momentum Oscillator
-NOTE: The CMO function has an unstable period.
-
 real = CMO(close, timeperiod=14)
 Learn more about the Chande Momentum Oscillator at tadoc.org.
 
-DX - Directional Movement Index
-NOTE: The DX function has an unstable period.
-
-real = DX(high, low, close, timeperiod=14)
-Learn more about the Directional Movement Index at tadoc.org.
-
 MFI - Money Flow Index
-NOTE: The MFI function has an unstable period.
-
 real = MFI(high, low, close, volume, timeperiod=14)
 Learn more about the Money Flow Index at tadoc.org.
 

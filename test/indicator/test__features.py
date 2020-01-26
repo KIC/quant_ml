@@ -129,7 +129,7 @@ class TestIndicator(TestCase):
 
         np.testing.assert_array_almost_equal(me, ta)
 
-    def test__bop(self):
+    def test__cci(self):
         me = ta_cci(DF_TEST, ddof=0)[-100:]
         ta = talib.CCI(DF_TEST["High"], DF_TEST["Low"], DF_TEST["Close"])[-100:]
 
