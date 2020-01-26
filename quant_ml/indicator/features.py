@@ -101,26 +101,24 @@ def ta_atr(df: _PANDAS, period=14, high="High", low="Low", close="Close", relati
     if exponential is True:
         return ta_ema(ta_tr(df, high, low, close, relative), period)
     if exponential == 'wilder':
-        return ta_ema(ta_tr(df, high, low, close, relative), period * 2 - 1)
+        return ta_wilders(ta_tr(df, high, low, close, relative), period)
     else:
         return ta_sma(ta_tr(df, high, low, close, relative), period)
 
 
 def ta_adx(df: _PANDAS, period=14, high="High", low="Low", close="Close") -> _PANDAS:
-    smooth = period * 2 - 1
-
     temp = _pd.DataFrame({
         "up": df[high] - df[high].shift(1),
         "down": df[low].shift(1) - df[low]
     }, index=df.index)
 
     atr = ta_atr(df, period, high, low, close, relative=False)
-    pdm = ta_ema(temp.apply(lambda r: r[0] if r["up"] > r["down"] and r["up"] > 0 else 0, raw=False, axis=1), smooth)
-    ndm = ta_ema(temp.apply(lambda r: r[1] if r["down"] > r["up"] and r["down"] > 0 else 0, raw=False, axis=1), smooth)
+    pdm = ta_wilders(temp.apply(lambda r: r[0] if r["up"] > r["down"] and r["up"] > 0 else 0, raw=False, axis=1), period)
+    ndm = ta_wilders(temp.apply(lambda r: r[1] if r["down"] > r["up"] and r["down"] > 0 else 0, raw=False, axis=1), period)
 
     pdi = pdm / atr
     ndi = ndm / atr
-    adx = ta_ema((pdi - ndi).abs() / (pdi + ndi).abs(), smooth)
+    adx = ta_wilders((pdi - ndi).abs() / (pdi + ndi).abs(), period)
 
     return _pd.DataFrame({"+DM": pdm, "-DM": ndm, "+DI": pdi, "-DI": ndi, "ADX": adx}, index=df.index)
 
