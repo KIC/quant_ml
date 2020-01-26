@@ -112,8 +112,27 @@ class TestIndicator(TestCase):
         np.testing.assert_array_almost_equal(me, ta / -100)
 
     def test__ultimate(self):
-        me = ta_ult_osc(DF_TEST)[-100:]
+        me = ta_ultimate_osc(DF_TEST)[-100:]
         ta = talib.ULTOSC(DF_TEST["High"], DF_TEST["Low"], DF_TEST["Close"])[-100:]
 
         np.testing.assert_array_almost_equal(me, ta / 100)
+
+    def test__ppo(self):
+        me = ta_ppo(DF_TEST["Close"], exponential=False)[-100:]
+        ta = talib.PPO(DF_TEST["Close"])[-100:]
+
+        np.testing.assert_array_almost_equal(me, ta / 100)
+
+    def test__bop(self):
+        me = ta_bop(DF_TEST)[-100:]
+        ta = talib.BOP(DF_TEST["Open"], DF_TEST["High"], DF_TEST["Low"], DF_TEST["Close"])[-100:]
+
+        np.testing.assert_array_almost_equal(me, ta)
+
+    def test__bop(self):
+        me = ta_cci(DF_TEST, ddof=0)[-100:]
+        ta = talib.CCI(DF_TEST["High"], DF_TEST["Low"], DF_TEST["Close"])[-100:]
+
+        np.testing.assert_array_almost_equal(me, ta / 100)
+
 

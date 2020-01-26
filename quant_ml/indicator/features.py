@@ -169,7 +169,7 @@ def ta_williams_R(df: _pd.DataFrame, period=14, close="Close", high="High", low=
     return (temp["highest_high"] - temp[close]) / (temp["highest_high"] - temp["lowest_low"])
 
 
-def ta_ult_osc(df: _pd.DataFrame, period1=7, period2=14, period3=28, close="Close", high="High", low="Low") -> _pd.Series:
+def ta_ultimate_osc(df: _pd.DataFrame, period1=7, period2=14, period3=28, close="Close", high="High", low="Low") -> _pd.Series:
     # BP = Close - Minimum(Low or Prior Close).
     # TR = Maximum(High or Prior Close)  -  Minimum(Low or Prior Close)
     prev_close = df[close].shift(1)
@@ -189,3 +189,53 @@ def ta_ult_osc(df: _pd.DataFrame, period1=7, period2=14, period3=28, close="Clos
 
     # UO = [(4 x Average7) + (2 x Average14) + Average28] / (4 + 2 + 1)
     return (4 * avs[0] + 2 * avs[1] + avs[2]) / 7
+
+
+def ta_ppo(df: _pd.DataFrame, fast_period=12, slow_period=26, exponential=True) -> _PANDAS:
+    fast = ta_ema(df, period=fast_period) if exponential else ta_sma(df, period=fast_period)
+    slow = ta_ema(df, period=slow_period) if exponential else ta_sma(df, period=slow_period)
+    return (fast - slow) / slow
+
+
+def ta_bop(df: _pd.DataFrame, open="Open", high="High", low="Low", close="Close") -> _PANDAS:
+    # (CLOSE – OPEN) / (HIGH – LOW)
+    return (df[close] - df[open]) / (df[high] - df[low])
+
+
+def ta_cci(df: _pd.DataFrame, period=14, ddof=1, high="High", low="Low", close="Close", alpha=0.015) -> _PANDAS:
+    tp = (df[high] + df[low] + df[close]) / 3
+    tp_sma = ta_sma(tp, period)
+    md = tp.rolling(period).apply(lambda x: _np.abs(x - x.mean()).sum() / period)
+    return (1 / alpha) * (tp - tp_sma) / md / 100
+
+
+"""
+TODO add this missing indicators
+
+AROONOSC - Aroon Oscillator
+real = AROONOSC(high, low, timeperiod=14)
+Learn more about the Aroon Oscillator at tadoc.org.
+
+CMO - Chande Momentum Oscillator
+NOTE: The CMO function has an unstable period.
+
+real = CMO(close, timeperiod=14)
+Learn more about the Chande Momentum Oscillator at tadoc.org.
+
+DX - Directional Movement Index
+NOTE: The DX function has an unstable period.
+
+real = DX(high, low, close, timeperiod=14)
+Learn more about the Directional Movement Index at tadoc.org.
+
+MFI - Money Flow Index
+NOTE: The MFI function has an unstable period.
+
+real = MFI(high, low, close, volume, timeperiod=14)
+Learn more about the Money Flow Index at tadoc.org.
+
+STOCH - Stochastic
+slowk, slowd = STOCH(high, low, close, fastk_period=5, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
+Learn more about the Stochastic at tadoc.org.
+
+"""
