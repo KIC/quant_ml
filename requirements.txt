@@ -4,6 +4,7 @@ matplotlib
 tensorflow==1.14.0
 mlxtend
 seaborn
+minisom
 pandas
 keras
 numpy

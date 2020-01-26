@@ -5,9 +5,10 @@ import quant_ml.indicator.features as indicators
 import quant_ml.indicator.labels as forward_indicators
 import quant_ml.indicator.forecast as forecast
 import quant_ml.discrete.categorize as categorize
+import quant_ml.discrete.candlestick as candlesticks
 from pandas.core.base import PandasObject
 
-for indicator_functions in [indicators, forward_indicators, categorize, forecast]:
+for indicator_functions in [indicators, forward_indicators, categorize, forecast, candlesticks]:
     for indicator_function in dir(indicator_functions):
         if indicator_function.startswith("ta_"):
             setattr(PandasObject, indicator_function, getattr(indicator_functions, indicator_function))
