@@ -20,7 +20,7 @@ def ta_ema(df: _PANDAS, period=12) -> _PANDAS:
 
 def ta_wilders(df: _PANDAS, period=12) -> _PANDAS:
     if isinstance(df, _pd.Series):
-        return ta_wilders(df.to_frame(), period)[df.name]
+        return ta_wilders(df.to_frame(), period).iloc[:, 0]
     else:
         resdf = _pd.DataFrame({}, index=df.index)
         for col in df.columns:
