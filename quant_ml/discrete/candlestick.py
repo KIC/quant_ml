@@ -90,7 +90,7 @@ def ta_candle(df: _pd.DataFrame, open="Open", high="High", low="Low", close="Clo
 def fit(df: _pd.DataFrame, size=(7, 6), open="Open", high="High", low="Low", close="Close", make_relative=True, iter=1000, random_seed=2):
     relative = ta_realative_candles(df, open, high, low, close) if make_relative else df[[open, close, high, low]]
     candles = relative.dropna().values
-    som = _MiniSom(size[0], size[1], candles.shape[1], random_seed=2)
+    som = _MiniSom(size[0], size[1], candles.shape[1], random_seed=random_seed)
     som.pca_weights_init(candles)
     som.train_random(candles, iter)
     return som

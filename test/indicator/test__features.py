@@ -105,3 +105,9 @@ class TestIndicator(TestCase):
 
         np.testing.assert_array_almost_equal(me, ta / 100)
 
+    def test__williams_R(self):
+        me = ta_williams_R(DF_TEST)[-100:]
+        ta = talib.WILLR(DF_TEST["High"], DF_TEST["Low"], DF_TEST["Close"])[-100:]
+
+        np.testing.assert_array_almost_equal(me, ta / -100)
+

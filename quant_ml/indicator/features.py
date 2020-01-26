@@ -162,3 +162,9 @@ def ta_cross_under(df: _pd.DataFrame, a, b) -> _PANDAS:
     return ta_cross_over(df, b, a)
 
 
+def ta_williams_R(df: _pd.DataFrame, period=14, close="Close", high="High", low="Low") -> _pd.Series:
+    temp = df[[close]]
+    temp = temp.join(df[high if high is not None else close].rolling(period).max().rename("highest_high"))
+    temp = temp.join(df[low if low is not None else close].rolling(period).min().rename("lowest_low"))
+    return (temp["highest_high"] - temp[close]) / (temp["highest_high"] - temp["lowest_low"])
+
