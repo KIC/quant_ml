@@ -168,3 +168,24 @@ def ta_williams_R(df: _pd.DataFrame, period=14, close="Close", high="High", low=
     temp = temp.join(df[low if low is not None else close].rolling(period).min().rename("lowest_low"))
     return (temp["highest_high"] - temp[close]) / (temp["highest_high"] - temp["lowest_low"])
 
+
+def ta_ult_osc(df: _pd.DataFrame, period1=7, period2=14, period3=28, close="Close", high="High", low="Low") -> _pd.Series:
+    # BP = Close - Minimum(Low or Prior Close).
+    # TR = Maximum(High or Prior Close)  -  Minimum(Low or Prior Close)
+    prev_close = df[close].shift(1)
+    downs = (df[[low if low is not None else close]].join(prev_close)).min(axis=1)
+    ups = (df[[high if high is not None else close]].join(prev_close)).max(axis=1)
+    temp = _pd.DataFrame({
+        "bp": df[close] - downs,
+        "tr": ups - downs
+    }, index=df.index)
+
+    periods = [period1, period2, period3]
+    avs = []
+    for period in periods:
+        # Average7 = (7 - period BP Sum) / (7 - period TR Sum)
+        av = temp.rolling(period).sum()
+        avs.append(av["bp"] / av["tr"])
+
+    # UO = [(4 x Average7) + (2 x Average14) + Average28] / (4 + 2 + 1)
+    return (4 * avs[0] + 2 * avs[1] + avs[2]) / 7

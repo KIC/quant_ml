@@ -111,3 +111,9 @@ class TestIndicator(TestCase):
 
         np.testing.assert_array_almost_equal(me, ta / -100)
 
+    def test__ultimate(self):
+        me = ta_ult_osc(DF_TEST)[-100:]
+        ta = talib.ULTOSC(DF_TEST["High"], DF_TEST["Low"], DF_TEST["Close"])[-100:]
+
+        np.testing.assert_array_almost_equal(me, ta / 100)
+
