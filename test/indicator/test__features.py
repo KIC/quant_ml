@@ -16,6 +16,12 @@ class TestIndicator(TestCase):
 
         np.testing.assert_array_almost_equal(me, ta)
 
+    def test__wilders(self):
+        me = ta_wilders(DF_TEST["Close"], 20)[-100:]
+        ta = talib.EMA(DF_TEST["Close"], 20 * 2 -1)[-100:]
+
+        np.testing.assert_array_almost_equal(me, ta)
+
     def test__macd(self):
         my_macd = ta_macd(DF_TEST["Close"], relative=False)
         talib_macd = pd.DataFrame(talib.MACD(DF_TEST["Close"])).T
@@ -89,4 +95,10 @@ class TestIndicator(TestCase):
         co = ta_cross_over(DF_TEST, "Close", mean)
 
         self.assertTrue(co[-2:].values[0])
+
+    def test__rsi(self):
+        me = ta_rsi(DF_TEST["Close"])[-100:]
+        ta = talib.RSI(DF_TEST["Close"])[-100:]
+
+        np.testing.assert_array_almost_equal(me, ta / 100)
 
