@@ -5,7 +5,7 @@ setup(
    version='0.0.0',
    author='KIC',
    author_email='',
-   packages=find_namespace_packages(include=["quant_ml.*"]),
+   packages=["quant_ml"] + find_namespace_packages(include=["quant_ml.*"]),
    scripts=[],
    url='https://github.com/KIC/quant_ml',
    license='MIT',
