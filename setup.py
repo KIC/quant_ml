@@ -1,11 +1,11 @@
-from setuptools import setup, find_namespace_packages
+from setuptools import setup, find_packages
 
 setup(
    name='quant-ml',
    version='0.0.0',
    author='KIC',
    author_email='',
-   packages=["quant_ml"] + find_namespace_packages(include=["quant_ml.*"]),
+   packages=find_packages(),
    scripts=[],
    url='https://github.com/KIC/quant_ml',
    license='MIT',
