@@ -1,3 +1,8 @@
+"""
+this module basically re-implements all oscillators from TA-Lib:
+  https://mrjbq7.github.io/ta-lib/func_groups/momentum_indicators.html
+"""
+
 import pandas as _pd
 from typing import Union as _Union
 
