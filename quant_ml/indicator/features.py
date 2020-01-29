@@ -111,10 +111,10 @@ def ta_atr(df: _PANDAS, period=14, high="High", low="Low", close="Close", relati
         return ta_sma(ta_tr(df, high, low, close, relative), period)
 
 
-def ta_adx(df: _PANDAS, period=14, high="High", low="Low", close="Close") -> _PANDAS:
+def ta_adx(df: _PANDAS, period=14, high="High", low="Low", close="Close", relative=True) -> _PANDAS:
     temp = _pd.DataFrame({
-        "up": df[high] - df[high].shift(1),
-        "down": df[low].shift(1) - df[low]
+        "up": (df[high] / df[high].shift(1) - 1) if relative else (df[high] - df[high].shift(1)),
+        "down": (df[low].shift(1) / df[low] - 1) if relative else (df[low].shift(1) - df[low])
     }, index=df.index)
 
     atr = ta_atr(df, period, high, low, close, relative=False)

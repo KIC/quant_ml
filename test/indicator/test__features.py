@@ -65,7 +65,7 @@ class TestIndicator(TestCase):
         np.testing.assert_array_almost_equal(me, ta)
 
     def test__adx(self):
-        me = ta_adx(DF_TEST)[-100:]
+        me = ta_adx(DF_TEST, relative=False)[-100:]
         ta_pdi = talib.PLUS_DI(DF_TEST["High"], DF_TEST["Low"], DF_TEST["Close"])[-100:]
         ta_mdi = talib.MINUS_DI(DF_TEST["High"], DF_TEST["Low"], DF_TEST["Close"])[-100:]
 

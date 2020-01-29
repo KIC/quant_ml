@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Union
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -11,10 +11,28 @@ from matplotlib.figure import Figure
 from mlxtend.evaluate import confusion_matrix
 from mlxtend.plotting import plot_confusion_matrix
 from sklearn.metrics import roc_curve, auc
+import matplotlib.gridspec as gridspec
 
 
-def plot_heat_bar(df: pd.DataFrame, prediction_columns, target_columns, density=0.01) -> Tuple[Figure, Axis]:
-    fig, ax = plt.subplots(figsize=(2, 9))
+def plot_heated_stacked_area_with_bar(df: pd.DataFrame,
+                                      lines: str,
+                                      heat: str,
+                                      backtest: str,
+                                      figsize=(20,9)) -> Tuple[Figure, Union[Axis, Tuple[Axis,...]]]:
+    fig = plt.figure(figsize=figsize)
+    gs1 = gridspec.GridSpec(1, 2, width_ratios=[5, 1])
+    ax = (fig.add_subplot(gs1[0]), fig.add_subplot(gs1[1]))
+
+    plot_heated_stacked_area(df, lines, heat, backtest, reset_y_lim=True, ax=ax[0])
+    plot_heat_bar(df, heat, lines, ax=ax[1])
+    gs1.tight_layout(fig)
+
+    return fig, ax
+
+
+def plot_heat_bar(df: pd.DataFrame, prediction_columns: str, target_columns: str, ax:Axis = None) -> Figure:
+    _, ax = plt.subplots(figsize=(2, 9)) if ax is None else (None, ax)
+
     probabilities = df[prediction_columns].values[-1]
     targets = df[target_columns].values[-1, :len(probabilities)].round(2)
     date = df.index[-1]
@@ -32,12 +50,11 @@ def plot_heat_bar(df: pd.DataFrame, prediction_columns, target_columns, density=
                 fmt=".2f")
 
     # plot the max cell with special annotation
-    return fig, sns.heatmap(data,
-                            mask=(data != max_in_each_column),
-                            annot_kws={"weight": "bold", "c": "blue"},
-                            annot=True,
-                            fmt=".2f")
-
+    return sns.heatmap(data,
+                       mask=(data != max_in_each_column),
+                       annot_kws={"weight": "bold", "c": "blue"},
+                       annot=True,
+                       fmt=".2f")
 
 
 def plot_heated_stacked_area(df: pd.DataFrame,
@@ -46,7 +63,8 @@ def plot_heated_stacked_area(df: pd.DataFrame,
                              backtest: str = None,
                              reset_y_lim: bool = False,
                              figsize: Tuple[int, int] = (16, 9),
-                             color_map: str = 'afmhot') -> Tuple[Figure, Axis]:
+                             color_map: str = 'afmhot',
+                             ax:Axis = None) -> Axis:
     color_function = plt.get_cmap(color_map)
     x = df.index
     y = df[lines].values
@@ -57,28 +75,30 @@ def plot_heated_stacked_area(df: pd.DataFrame,
     assert len(y.shape) > 1 and len(c.shape) > 1 and y.shape[1] - 1 == c.shape[1], \
         f'unexpeced shapes: {len(y.shape)} > 1 and {len(c.shape)} > 1 and {y.shape[1] - 1} == {c.shape[1]}'
 
-    fig, ax = plt.subplots(figsize=figsize)
-    plt.plot(x, y, color='k', alpha=0.0)
+    _, ax = plt.subplots(figsize=figsize) if ax is None else (None, ax)
+
+    ax.plot(x, y, color='k', alpha=0.0)
 
     for ci in range(c.shape[1]):
         for xi in range(len(x)):
-            plt.fill_between(x[xi-1:xi+1], y[xi-1:xi+1, ci], y[xi-1:xi+1, ci+1],
-                             facecolors=color_function(c[xi-1:xi+1, ci]))
+            ax.fill_between(x[xi-1:xi+1], y[xi-1:xi+1, ci], y[xi-1:xi+1, ci+1],
+                            facecolors=color_function(c[xi-1:xi+1, ci]))
 
         if ci > 0:
             # todo annotate all first last and only convert date if it is actually a date
-            plt.annotate(f'{y[-1, ci]:.2f}', xy=(mdates.date2num(x[-1]), y[-1, ci]),
-                         xytext=(4, -4), textcoords='offset pixels')
+            ax.annotate(f'{y[-1, ci]:.2f}', xy=(mdates.date2num(x[-1]), y[-1, ci]),
+                        xytext=(4, -4), textcoords='offset pixels')
 
     # reset limits
+    ax.autoscale(tight=True)
     if reset_y_lim:
-        plt.ylim(bottom=y[:, 1].min(), top=y[:, -1].max())
+        ax.set_ylim(bottom=y[:, 1].min(), top=y[:, -1].max())
 
     # backtest
     if backtest:
-        plt.plot(x, b)
+        ax.plot(x, b)
 
-    return fig, ax
+    return ax
 
 
 def plot_one_hot_encoded_confusion_matrix(df: pd.DataFrame, true_columns, prediction_columns) -> Tuple[Figure, Axis]:
