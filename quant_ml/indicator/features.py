@@ -15,6 +15,10 @@ from quant_ml.util import wilders_smoothing
 _PANDAS = _Union[_pd.DataFrame, _pd.Series]
 
 
+def ta_inverse(df: _PANDAS) -> _PANDAS:
+    return df.apply(lambda col: col * -1 + col.min() + col.max(), raw=True)
+
+
 def ta_sma(df: _PANDAS, period=12) -> _PANDAS:
     return df.rolling(period).mean()
 
@@ -212,6 +216,19 @@ def ta_cci(df: _pd.DataFrame, period=14, ddof=1, high="High", low="Low", close="
     tp_sma = ta_sma(tp, period)
     md = tp.rolling(period).apply(lambda x: _np.abs(x - x.mean()).sum() / period)
     return (1 / alpha) * (tp - tp_sma) / md / 100
+
+
+def ta_up_down_volatility_ratio(df: _PANDAS, period=60, normalize=True):
+    if isinstance(df, _pd.DataFrame):
+        return df.apply(lambda col: ta_up_down_volatility_ratio(col, period, normalize))
+
+    returns = df.pct_change() if normalize else df
+    std = _pd.DataFrame({
+        "std+": returns[returns > 0].rolling(period).std(),
+        "std-": returns[returns < 0].rolling(period).std()
+    }, index=returns.index).fillna(method="ffill")
+
+    return std["std+"] / std["std-"] - 1
 
 
 """

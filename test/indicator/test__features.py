@@ -135,4 +135,9 @@ class TestIndicator(TestCase):
 
         np.testing.assert_array_almost_equal(me, ta / 100)
 
+    def test__up_down_volatility_ratio(self):
+        me = ta_up_down_volatility_ratio(DF_TEST)[-1:]
+
+        np.testing.assert_array_almost_equal(me, np.array([[-0.067, -0.232, -0.073, -0.318, -0.319,  1.776]]), 0.001)
+
 
