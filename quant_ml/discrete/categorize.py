@@ -10,7 +10,22 @@ import quant_ml.util as util
 def ta_convolution(df: _pd.DataFrame, period=90, buckets=10):
     # TODO take all columns of the data frame and transform them into a 2D array where the columns are one hot encoded
     #   trading days
+    # per column:
+    #   take min/max
+    #   then construct an IntervalIndex using [min, ..., max]
+    #   then take each value in the column and bucketize it
+    def convoluted(df: _pd.Series) -> _np.ndarray:
+        min = df.min()
+        max = df.max()
+        interval_index = _np.linspace(min, max, buckets)
+        indexes = _np.digitize(df, interval_index) - 1
+        _np.array([util.one_hot(index, buckets) for index in indexes])
+
+    df.rolling(period).apply(convoluted)
+
     pass
+
+
 
 
 def ta_bucketize(df: _pd.DataFrame,
@@ -66,12 +81,13 @@ def ta_one_hot_categories(df: _pd.DataFrame):
     res = None
 
     for col in df.columns:
-        categories = [str(cat) for cat in df[col].cat.categories]
-        l = len(categories)
-        ohdf = indexes[[col]].apply(lambda c: util.one_hot(c, l), axis=1, result_type='expand')
-        ohdf.columns = _pd.MultiIndex.from_product([[col], categories])
+        if hasattr(df[col], "cat"):
+            categories = [str(cat) for cat in df[col].cat.categories]
+            l = len(categories)
+            ohdf = indexes[[col]].apply(lambda c: util.one_hot(c, l), axis=1, result_type='expand')
+            ohdf.columns = _pd.MultiIndex.from_product([[col], categories])
 
-        res = ohdf if res is None else res.join(ohdf)
+            res = ohdf if res is None else res.join(ohdf)
 
     return res
 

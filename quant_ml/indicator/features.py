@@ -140,22 +140,26 @@ def ta_bbands(df: _PANDAS, period=5, stddev=2.0, ddof=1) -> _PANDAS:
     upper = mean + (std * stddev)
     lower = mean - (std * stddev)
     z_score = (most_recent - mean) / std
+    quantile = (most_recent > upper).astype(int) - (most_recent < lower).astype(int)
 
     if isinstance(mean, _pd.Series):
         upper.name = "upper"
         mean.name = "mean"
         lower.name = "lower"
         z_score.name = "z"
+        quantile.name = "quantile"
     else:
         upper.columns = _pd.MultiIndex.from_product([upper.columns, ["uppen"]])
         mean.columns = _pd.MultiIndex.from_product([mean.columns, ["mean"]])
         lower.columns = _pd.MultiIndex.from_product([lower.columns, ["lower"]])
         z_score.columns = _pd.MultiIndex.from_product([z_score.columns, ["z"]])
+        quantile.columns = _pd.MultiIndex.from_product([z_score.columns, ["quantile"]])
 
     return _pd.DataFrame(upper) \
         .join(mean) \
         .join(lower) \
         .join(z_score) \
+        .join(quantile) \
         .sort_index(axis=1)
 
 
@@ -218,7 +222,7 @@ def ta_cci(df: _pd.DataFrame, period=14, ddof=1, high="High", low="Low", close="
     return (1 / alpha) * (tp - tp_sma) / md / 100
 
 
-def ta_up_down_volatility_ratio(df: _PANDAS, period=60, normalize=True):
+def ta_up_down_volatility_ratio(df: _PANDAS, period=60, normalize=True, setof_date=False):
     if isinstance(df, _pd.DataFrame):
         return df.apply(lambda col: ta_up_down_volatility_ratio(col, period, normalize))
 
@@ -228,7 +232,14 @@ def ta_up_down_volatility_ratio(df: _PANDAS, period=60, normalize=True):
         "std-": returns[returns < 0].rolling(period).std()
     }, index=returns.index).fillna(method="ffill")
 
-    return std["std+"] / std["std-"] - 1
+    ratio = (std["std+"] / std["std-"] - 1).rename("std +/-")
+
+    # eventually we can off set the date such that we can fake one continuous data frame
+    if setof_date:
+        # +7 -1 binds us approximately to the same week day
+        ratio.index = ratio.index - _pd.DateOffset(days=(ratio.index[-1] - ratio.index[0]).days + 7 - 1)
+
+    return ratio
 
 
 """

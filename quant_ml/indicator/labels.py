@@ -30,3 +30,15 @@ def ta_future_macd_cross(df: _pd.Series, forecast_period=14, fast_period=12, slo
     zero = macd["histogram"] * 0
     cross = _i.ta_cross_over(None, macd["histogram"], zero) | _i.ta_cross_under(None, macd["histogram"], zero)
     return cross.shift(-forecast_period)
+
+
+def ta_future_bband_quantile(df: _pd.Series, forecast_period=14, period=5, stddev=2.0, ddof=1):
+    # we want to know if a future price is violating the current upper/lower band
+    bands = _i.ta_bbands(df, period, stddev, ddof)
+    upper = bands["upper"]
+    lower = bands["lower"]
+    future = df.shift(-forecast_period)
+    quantile = (future > upper).astype(int) - (future < lower).astype(int)
+
+    return quantile
+

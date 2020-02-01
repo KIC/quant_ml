@@ -42,3 +42,12 @@ class TestIndicators(TestCase):
 
         self.assertTrue(fcross.iloc[-3])
 
+    def test__future_bband_quantile(self):
+        q = ta_future_bband_quantile(DF_TEST["Close"], 2)
+
+        print(q[-10:])
+        self.assertEqual(-1, q.iloc[-5])
+        self.assertEqual(0, q.iloc[-6])
+        self.assertEqual(0, q.iloc[-7])
+        self.assertEqual(1, q.iloc[-8])
+

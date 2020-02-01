@@ -7,7 +7,7 @@ from numba import guvectorize, float32, int32, float64, int64
 def one_hot(index, len):
     arr = np.zeros(len)
 
-    if isinstance(index, int):
+    if np.issubdtype(np.uint32, np.integer):
         arr[index] = 1.0
     elif index.values >= 0:
         arr[index] = 1.0
