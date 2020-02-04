@@ -1,3 +1,4 @@
+import logging
 import math
 
 import pandas as _pd
@@ -5,6 +6,8 @@ import numpy as _np
 from typing import Iterable, Union
 
 import quant_ml.util as util
+
+_log = logging.getLogger(__name__)
 
 
 def ta_convolution(df: _pd.DataFrame, period=90, buckets=10):
@@ -49,7 +52,7 @@ def ta_bucketize(df: _pd.DataFrame,
     if isinstance(df, _pd.DataFrame):
         return _pd.DataFrame({col: _pd.cut(df[col], buckets) for col in df.columns}, index=df.index)
     elif isinstance(df, _pd.Series):
-        return _pd.DataFrame({df.name: _pd.cut(df, buckets)}, index=df.index)
+        return _pd.DataFrame(_pd.cut(df, buckets))
     else:
         raise ValueError(f"unsupported type {type(df)}")
 
@@ -66,30 +69,55 @@ def percent_bucket_to_target(b, price):
             return price
 
 
-def index_of_categories(df: _pd.DataFrame):
-    if isinstance(df, _pd.DataFrame):
-        return _pd.DataFrame({col: df[col].cat.codes.values for col in df.columns}, index=df.index)
-    elif isinstance(df, _pd.Series):
-        return df.cat.codes.values
-    else:
-        raise ValueError(f"unsupported type {type(df)}")
-
-
 def ta_one_hot_categories(df: _pd.DataFrame):
-    indexes = index_of_categories(df)
+    """
+    Take a category column or a column of integers and turn them into a one hot encoded data frame
+    :param df: a series or a data frame which has category columns or integer columns
+    :return: a multi index data frame with one hot encoded integer columns
+             note: can be empty
+    """
+
     df = df.to_frame() if isinstance(df, _pd.Series) else df
     res = None
 
     for col in df.columns:
         if hasattr(df[col], "cat"):
             categories = [str(cat) for cat in df[col].cat.categories]
-            l = len(categories)
-            ohdf = indexes[[col]].apply(lambda c: util.one_hot(c, l), axis=1, result_type='expand')
-            ohdf.columns = _pd.MultiIndex.from_product([[col], categories])
+            df_of_categories = index_of_categories(df[col])
 
-            res = ohdf if res is None else res.join(ohdf)
+        elif df[col].dtype.kind in 'iu':
+            categories = sorted(set(df[col].values))
+            df_of_categories = df
+
+        else:
+            continue
+
+        number_of_categories = len(categories)
+        ohdf = df_of_categories[[col]].apply(lambda r: util.one_hot(r, number_of_categories), axis=1, result_type='expand')
+        ohdf.columns = _pd.MultiIndex.from_product([[col], categories])
+        res = ohdf if res is None else res.join(ohdf)
+
+    if res is None:
+        _log.warning(f'non of the {df.columns} are of type category index or integer value!\n'
+                     f'You might want to call df.ta_one_hot_categories(df.ta_bucketize(3))')
 
     return res
+
+
+def index_of_categories(df: _pd.DataFrame):
+    """
+    Convert a pandas category index into the integer (index) values of the categories
+
+    :param df: data frame or series with a one category column
+    :return: a data frame or series of integer values corresponding to the indexes in the category index.
+             note: can be empty
+    """
+    if isinstance(df, _pd.DataFrame):
+        return _pd.DataFrame({col: df[col].cat.codes.values for col in df.columns}, index=df.index)
+    elif isinstance(df, _pd.Series):
+        return _pd.DataFrame(df.cat.codes.values, index=df.index, columns=[df.name])
+    else:
+        raise ValueError(f"unsupported type {type(df)}")
 
 
 def one_hot_to_categories(df: _pd.DataFrame, categories):

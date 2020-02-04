@@ -135,7 +135,7 @@ def ta_adx(df: _PANDAS, period=14, high="High", low="Low", close="Close", relati
 def ta_bbands(df: _PANDAS, period=5, stddev=2.0, ddof=1) -> _PANDAS:
     mean = df.rolling(period).mean()
     std = df.rolling(period).std(ddof=ddof)
-    most_recent = df.rolling(period).apply(lambda x: x[-1])
+    most_recent = df.rolling(period).apply(lambda x: x[-1], raw=True)
 
     upper = mean + (std * stddev)
     lower = mean - (std * stddev)
