@@ -33,9 +33,18 @@ def plot_heated_stacked_area_with_bar(df: pd.DataFrame,
 def plot_heat_bar(df: pd.DataFrame, prediction_columns: str, target_columns: str, ax:Axis = None) -> Figure:
     _, ax = plt.subplots(figsize=(2, 9)) if ax is None else (None, ax)
 
-    probabilities = df[prediction_columns].values[-1]
-    targets = df[target_columns].values[-1, :len(probabilities)].round(2)
     date = df.index[-1]
+    probabilities = df[prediction_columns].values[-1]
+    targets = df[target_columns].values[-1].round(2)
+
+    # fix targets length
+    if len(targets) > len(probabilities):
+        targets = pd.IntervalIndex.from_breaks(targets)
+    elif len(targets) == len(probabilities) - 1:
+        targets = pd.IntervalIndex.from_breaks(
+            np.hstack([[-float('inf')], targets, [float('inf')]]))
+    else:
+        raise ValueError("not enough target values!")
 
     data = pd.DataFrame({f"probability\n{date}": probabilities}, index=targets).iloc[::-1]
     max_in_each_column = np.max(data.values)
@@ -50,11 +59,14 @@ def plot_heat_bar(df: pd.DataFrame, prediction_columns: str, target_columns: str
                 fmt=".2f")
 
     # plot the max cell with special annotation
-    return sns.heatmap(data,
-                       mask=(data != max_in_each_column),
-                       annot_kws={"weight": "bold", "c": "blue"},
-                       annot=True,
-                       fmt=".2f")
+    ax =  sns.heatmap(data,
+                      mask=(data != max_in_each_column),
+                      annot_kws={"weight": "bold", "c": "blue"},
+                      annot=True,
+                      fmt=".2f")
+
+    plt.yticks(rotation=0)
+    return ax
 
 
 def plot_heated_stacked_area(df: pd.DataFrame,
@@ -64,16 +76,25 @@ def plot_heated_stacked_area(df: pd.DataFrame,
                              reset_y_lim: bool = False,
                              figsize: Tuple[int, int] = (16, 9),
                              color_map: str = 'afmhot',
-                             ax:Axis = None) -> Axis:
+                             ax:Axis = None,
+                             upper_lower_missing_scale: float = 0.05) -> Axis:
     color_function = plt.get_cmap(color_map)
     x = df.index
     y = df[lines].values
     c = df[heat].values
     b = df[backtest].values if backtest is not None else None
 
+    # assert enough data
+    assert len(y.shape) > 1 and len(c.shape) > 1, "lines and heat need to be 2 dimensions!"
+
     # make sure we have one more line as heats
-    assert len(y.shape) > 1 and len(c.shape) > 1 and y.shape[1] - 1 == c.shape[1], \
-        f'unexpeced shapes: {len(y.shape)} > 1 and {len(c.shape)} > 1 and {y.shape[1] - 1} == {c.shape[1]}'
+    if c.shape[1] == y.shape[1] + 1:
+        lower = np.full((c.shape[0], 1), y.min() * (1 - upper_lower_missing_scale))
+        upper = np.full((c.shape[0], 1), y.max() * (1 + upper_lower_missing_scale))
+        y = np.hstack([lower, y, upper])
+
+    # check for matching columns
+    assert y.shape[1] - 1 == c.shape[1], f'unexpeced shapes: {y.shape[1] - 1} != {c.shape[1]}'
 
     _, ax = plt.subplots(figsize=figsize) if ax is None else (None, ax)
 
