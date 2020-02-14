@@ -2,9 +2,11 @@ pandas-ml-utils
 scikit-learn
 matplotlib
 tensorflow==1.14.0
+qpsolvers
 mlxtend
 seaborn
 minisom
+cvxopt
 pandas
 keras
 numpy
