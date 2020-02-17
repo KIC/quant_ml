@@ -39,7 +39,8 @@ class TestOptimizedStrategies(TestCase):
                                   period=20,
                                   prices='Close',
                                   expected_returns='expectation',
-                                  rebalance_trigger='trigger')
+                                  rebalance_trigger='trigger',
+                                  result='weights')
 
         """then"""
         print(portfolios)

@@ -269,6 +269,7 @@ def ta_up_down_volatility_ratio(df: _PANDAS, period=60, normalize=True, setof_da
 def ta_zscore(df: _PANDAS, period=20, ddof=1):
     return df.rolling(period).apply(lambda c: zscore(c, ddof=ddof)[-1])
 
+
 """
 TODO add this missing indicators
 

@@ -15,7 +15,7 @@ def ta_markowitz(df: pd.DataFrame,
                  prices='Close',
                  expected_returns=None,
                  rebalance_trigger=None,
-                 result='fraction_per_dollar',  # can be weight|fraction_per_dollar
+                 result='weights',  # can be weight|fraction_per_dollar
                  solver='cvxopt'):
     assert isinstance(df.columns, pd.MultiIndex), \
         "expect multi index columns 'prices', 'expected returns' and rebalance trigger"
@@ -46,7 +46,7 @@ def ta_markowitz(df: pd.DataFrame,
     # define optimization function
     def optimize_portfolios(row, last_solution):
         # only optimize if we have a re-balance trigger (early exit)
-        if last_solution is not None:
+        if last_solution is not None and last_solution.sum() > 0.99:
             trigger_values = row['trigger'].iloc[-1].values
             if len(row['trigger'].columns) == len(row['returns'].columns):
                 # only exit if we have a signal for a significant part of the last solution
