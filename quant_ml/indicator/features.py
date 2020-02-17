@@ -4,6 +4,7 @@ this module basically re-implements all oscillators from TA-Lib:
 """
 
 import pandas as _pd
+import numpy as _np
 from typing import Union as _Union
 
 # create convenient type hint
@@ -164,16 +165,38 @@ def ta_bbands(df: _PANDAS, period=5, stddev=2.0, ddof=1) -> _PANDAS:
         .sort_index(axis=1)
 
 
-def ta_cross_over(df: _pd.DataFrame, a, b, period=1) -> _PANDAS:
+def ta_cross_over(df: _pd.DataFrame, a, b=None, period=1) -> _PANDAS:
+    if isinstance(a, int):
+        if isinstance(df, _pd.Series):
+            a = _pd.Series(_np.ones(len(df)) * a, name=df.name, index=df.index)
+        else:
+            a = _pd.DataFrame({c: _np.ones(len(df)) * a for c in df.columns}, index=df.index)
+
+    if b is None:
+        b = a
+        a = df
+
     old_a = (a if isinstance(a, PandasObject) else df[a]).shift(period)
-    old_b = (b if isinstance(b, PandasObject) else df[b]).shift(period)
     young_a = (a if isinstance(a, PandasObject) else df[a])
+
+    if isinstance(b, int):
+        if isinstance(old_a, _pd.Series):
+            b = _pd.Series(_np.ones(len(df)) * b, name=old_a.name, index=old_a.index)
+        else:
+            b = _pd.DataFrame({c : _np.ones(len(df)) * b for c in old_a.columns}, index=old_a.index)
+
+    old_b = (b if isinstance(b, PandasObject) else df[b]).shift(period)
     young_b = (b if isinstance(b, PandasObject) else df[b])
+
     return (old_a <= old_b) & (young_a > young_b)
 
 
-def ta_cross_under(df: _pd.DataFrame, a, b) -> _PANDAS:
-    return ta_cross_over(df, b, a)
+def ta_cross_under(df: _pd.DataFrame, a, b=None, period=1) -> _PANDAS:
+    if b is None:
+        b = a
+        a = df
+
+    return ta_cross_over(df, b, a, period)
 
 
 def ta_williams_R(df: _pd.DataFrame, period=14, close="Close", high="High", low="Low") -> _pd.Series:

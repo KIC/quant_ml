@@ -30,7 +30,7 @@ class TestOptimizedStrategies(TestCase):
         df = DF_TEST_MULTI
         df_price = cloc2(df, ['Close'])
         df_expected_returns = cloc2(df_price["Close"].ta_macd(), "histogram")
-        df_trigger = ta_zscore(df_price['Close']).abs() > 1.5
+        df_trigger = ta_zscore(df_price['Close']).abs() > 2.0
         df_data = inner_join(df_price, df_expected_returns, prefix='expectation')
         df_data = inner_join(df_data, df_trigger, prefix='trigger')
 
