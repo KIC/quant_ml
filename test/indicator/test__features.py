@@ -140,4 +140,9 @@ class TestIndicator(TestCase):
 
         np.testing.assert_array_almost_equal(me, np.array([[-0.067, -0.232, -0.073, -0.318, -0.319,  1.776]]), 0.001)
 
+    def test__z_score(self):
+        me = ta_zscore(DF_TEST)[-1:]
+
+        np.testing.assert_array_almost_equal(me, np.array([[ 0.546, 0.256, 0.271, 0.457,  0.457, -0.929]]), 0.001)
+
 

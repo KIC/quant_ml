@@ -11,6 +11,7 @@ from pandas.core.base import PandasObject
 import numpy as _np
 
 from quant_ml.util import wilders_smoothing
+from scipy.stats import zscore
 
 _PANDAS = _Union[_pd.DataFrame, _pd.Series]
 
@@ -241,6 +242,9 @@ def ta_up_down_volatility_ratio(df: _PANDAS, period=60, normalize=True, setof_da
 
     return ratio
 
+
+def ta_zscore(df: _PANDAS, period=20, ddof=1):
+    return df.rolling(period).apply(lambda c: zscore(c, ddof=ddof)[-1])
 
 """
 TODO add this missing indicators
