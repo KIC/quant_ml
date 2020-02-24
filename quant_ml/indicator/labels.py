@@ -6,8 +6,6 @@ _PANDAS = _Union[_pd.DataFrame, _pd.Series]
 
 
 def ta_future_pct_of_mean(df: _pd.Series, forecast_period=1, period=14):
-    assert isinstance(df, _pd.Series)
-
     future = df.shift(-forecast_period)
     mean = df.rolling(period).mean()
 

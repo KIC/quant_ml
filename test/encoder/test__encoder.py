@@ -6,7 +6,7 @@ from sklearn.neural_network import MLPClassifier
 
 import pandas_ml_utils as pmu
 import quant_ml as qml
-from quant_ml.discrete.encoders import IntervalIndexEncoder
+from quant_ml.encoders import IntervalIndexEncoder
 
 # read testdata
 df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "SPY.csv"), index_col='Date')
@@ -17,8 +17,8 @@ class TestEncoder(TestCase):
 
     def test__inderval_index_encoder(self):
         """given features and labels"""
-        df["sma_ratio"] = df["Close"].rolling(20).ta_future_pct_of_mean(0)
-        df["forward_sma_ratio"] = df["Close"].rolling(20).ta_future_pct_of_mean(3)
+        df["sma_ratio"] = df["Close"].ta_future_pct_of_mean(0, 20)
+        df["forward_sma_ratio"] = df["Close"].ta_future_pct_of_mean(3, 20)
 
         """and an IntervalIndex"""
         buckets = pd.IntervalIndex.from_breaks([-float("inf"), -0.05, 0.0, 0.05, float("inf")])
@@ -35,5 +35,5 @@ class TestEncoder(TestCase):
 
         """then"""
         print(predicted)
-        self.assertEqual(df.predict(fit.model), False) # FIXME
+        self.assertTrue(df.predict(fit.model).values[-1, -1] < 0.1)
 

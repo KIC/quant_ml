@@ -1,3 +1,4 @@
+import unittest
 from unittest import TestCase
 import pandas_ml_utils as pmu
 import quant_ml as qml
@@ -13,6 +14,7 @@ print(qml.__version__)
 
 class TestStrategy(TestCase):
 
+    @unittest.skip("add test")
     def test_lala(self):
         """given"""
         backtest_df = pmu.LazyDataFrame(df[["Close"]],

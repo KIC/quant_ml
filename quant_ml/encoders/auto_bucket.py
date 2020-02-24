@@ -1,6 +1,6 @@
 import pandas as pd
 
-from quant_ml.discrete.encoders import IntervalIndexEncoder
+from quant_ml.encoders.interval_index_encoder import IntervalIndexEncoder
 from quant_ml.util import arange_open
 
 

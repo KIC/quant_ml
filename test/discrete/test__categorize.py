@@ -1,3 +1,4 @@
+import unittest
 from unittest import TestCase
 
 import numpy as np
@@ -9,6 +10,7 @@ from test import DF_TEST
 
 class TestCategorize(TestCase):
 
+    @unittest.skip("not yet implemented")
     def test__convolution(self):
         ta_convolution(DF_TEST["Close"])
         pass
