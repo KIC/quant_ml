@@ -2,8 +2,7 @@ import logging
 import traceback
 
 import numpy as np
-import pandas as pd
-from pandas.core.base import PandasObject
+from pandas_ml_utils import pd
 from qpsolvers import solve_qp
 from statsmodels.stats.correlation_tools import cov_nearest
 
@@ -26,7 +25,11 @@ def ta_markowitz(df: pd.DataFrame,
 
     # risk
     if covariances is None:
-        cov = ta_ewma_covariance(df[prices])
+        if isinstance(df.columns, pd.MultiIndex) and prices in df.columns.get_level_values(1):
+            # we need to flip levels
+            cov = ta_ewma_covariance(df.cloc2(prices))
+        else:
+            cov = ta_ewma_covariance(df[prices])
     elif isinstance(covariances, str):
         cov = df[covariances]
     else:
@@ -102,7 +105,10 @@ def ta_markowitz(df: pd.DataFrame,
 def _default_returns_estimator(df, prices, expected_returns, return_period, nr_of_assets):
     # return
     if expected_returns is None:
-        exp_ret = df[prices].pct_change().rolling(return_period).mean()
+        if isinstance(df.columns, pd.MultiIndex) and prices in df.columns.get_level_values(1):
+            exp_ret = df.cloc2(prices).pct_change().rolling(return_period).mean()
+        else:
+            exp_ret = df[prices].pct_change().rolling(return_period).mean()
     elif isinstance(expected_returns, (int, float, np.ndarray)):
         exp_ret = pd.Series(np.ones((len(df), nr_of_assets)) * expected_returns, index=df.index)
     elif isinstance(expected_returns, str):

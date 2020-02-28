@@ -16,10 +16,9 @@ class TestOptimizedStrategies(TestCase):
     def test__ewma_markowitz(self):
         """given"""
         df = DF_TEST_MULTI
-        df_price = df.loc[:, (slice(None), 'Close')].swaplevel(0, 1, axis=1)
 
         """when"""
-        portfolios = ta_markowitz(df_price, return_period=20, result='weights')
+        portfolios = ta_markowitz(df, return_period=20, result='weights')
 
         """then"""
         print(portfolios)
