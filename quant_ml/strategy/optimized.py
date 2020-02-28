@@ -18,7 +18,6 @@ def ta_markowitz(df: pd.DataFrame,
                  prices='Close',
                  expected_returns=None,
                  rebalance_trigger=None,
-                 result='weights',  # can be weight|fraction_per_dollar
                  solver='cvxopt'):
     assert isinstance(df.columns, pd.MultiIndex), \
         "expect multi index columns 'prices', 'expected returns' and rebalance trigger"
@@ -89,17 +88,11 @@ def ta_markowitz(df: pd.DataFrame,
                 _log.error(traceback.format_exc())
                 return uninvest
 
-    index = set(df.index.intersection(cov.index.get_level_values(0)).intersection(exp_ret.index).intersection(trigger.index))
+    index = sorted(set(df.index.intersection(cov.index.get_level_values(0)).intersection(exp_ret.index).intersection(trigger.index)))
     weights = [optimize(trigger.loc[[i]].values, cov.loc[[i]].values, exp_ret[cov.columns].loc[[i]].values) for i in index]
 
     # turn weights into a data frame
-    weights = pd.DataFrame(weights, index=index, columns=cov.columns)
-
-    if result == 'fraction_per_dollar':
-        price = df[prices].loc[weights.index]
-        return weights / price
-    else:
-        return weights
+    return pd.DataFrame(weights, index=index, columns=cov.columns)
 
 
 def _default_returns_estimator(df, prices, expected_returns, return_period, nr_of_assets):

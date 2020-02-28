@@ -18,7 +18,7 @@ class TestOptimizedStrategies(TestCase):
         df = DF_TEST_MULTI
 
         """when"""
-        portfolios = ta_markowitz(df, return_period=20, result='weights')
+        portfolios = ta_markowitz(df, return_period=20)
 
         """then"""
         print(portfolios)
