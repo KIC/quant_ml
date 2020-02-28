@@ -10,6 +10,7 @@ from typing import Union as _Union
 # create convenient type hint
 from pandas.core.base import PandasObject
 import numpy as _np
+from pyts.image import GramianAngularField
 
 from quant_ml.util import wilders_smoothing
 from scipy.stats import zscore
@@ -268,6 +269,34 @@ def ta_up_down_volatility_ratio(df: _PANDAS, period=60, normalize=True, setof_da
 
 def ta_zscore(df: _PANDAS, period=20, ddof=1):
     return df.rolling(period).apply(lambda c: zscore(c, ddof=ddof)[-1])
+
+
+def ta_ewma_covariance(df: _PANDAS, convert_to='returns', alpha=0.97):
+    data = df
+
+    if convert_to == 'returns':
+        data = df.pct_change()
+    if convert_to == 'log-returns':
+        data = _np.log(df) - _np.log(df.shift(1))
+
+    return data.ewm(com=alpha).cov()
+
+
+def ta_gaf(df: _PANDAS,
+          period=20,
+          image_size=24,
+          sample_range=(-1, 1),
+          method='summation',
+          flatten=False,
+          overlapping=False):
+
+    def to_gaf(df):
+        gaf = GramianAngularField(image_size=image_size, sample_range=sample_range, method=method,
+                                  overlapping=overlapping, flatten=flatten)
+        return gaf.fit_transform(df.values)
+
+    return _pd.Series([to_gaf(df.iloc[i-period, period]) for i in range(period, len(df))], index=df.index, name="GAF")
+
 
 
 """

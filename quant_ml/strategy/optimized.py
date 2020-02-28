@@ -3,15 +3,19 @@ import traceback
 
 import numpy as np
 import pandas as pd
+from pandas.core.base import PandasObject
 from qpsolvers import solve_qp
 from statsmodels.stats.correlation_tools import cov_nearest
+
+from quant_ml.indicator.features import ta_ewma_covariance
 
 _log = logging.getLogger(__name__)
 
 
 def ta_markowitz(df: pd.DataFrame,
-                 period=90,
+                 covariances=None,
                  risk_aversion=5,
+                 return_period=60,
                  prices='Close',
                  expected_returns=None,
                  rebalance_trigger=None,
@@ -19,61 +23,60 @@ def ta_markowitz(df: pd.DataFrame,
                  solver='cvxopt'):
     assert isinstance(df.columns, pd.MultiIndex), \
         "expect multi index columns 'prices', 'expected returns' and rebalance trigger"
-    assert period > 1, "we need a positiv period"
 
-    # calculate log returns
-    log_returns = np.log(df[prices]) - np.log(df[prices].shift(1))
-    log_returns.columns = pd.MultiIndex.from_tuples([('returns', col) for col in log_returns.columns])
+    # risk
+    if covariances is None:
+        cov = ta_ewma_covariance(df[prices])
+    elif isinstance(covariances, str):
+        cov = df[covariances]
+    else:
+        cov = covariances
+    cov = cov.dropna()
 
-    # if expected returns is None simply use the moving average of the returns
-    expected = df[prices].pct_change() if expected_returns is None else df[expected_returns]
-    expected.columns = pd.MultiIndex.from_tuples([('expected', col) for col in expected.columns])
+    # return
+    exp_ret = _default_returns_estimator(df, prices, expected_returns, return_period, len(cov.columns))
 
-    # if re-balance trigger is none re-balance every row
-    trigger = pd.DataFrame(np.ones(len(df)), index=df.index) if rebalance_trigger is None else df[rebalance_trigger]
-    trigger.columns = pd.MultiIndex.from_tuples([('trigger', col) for col in trigger.columns])
+    # re-balance
+    trigger = (pd.Series(np.ones(len(df)), index=df.index) if rebalance_trigger is None else df[rebalance_trigger]).dropna()
 
     # non negative weight constraint and weights sum to 1
-    h = np.zeros(len(log_returns.columns)).reshape((-1, 1))
+    h = np.zeros(len(cov.columns)).reshape((-1, 1))
     G = -np.eye(len(h))
     A = np.ones(len(h)).reshape((1, -1))
     b = np.ones(1)
 
-    # no solution
+    # magic solution's
     keep_solution = (np.empty(len(h)) * np.nan)
     uninvest = np.zeros(len(h))
 
-    # define optimization function
-    def optimize_portfolios(row, last_solution):
+    # keep last solution
+    last_solution = None
+
+    def optimize(t, sigma, pi):
+        nonlocal last_solution
+        nr_of_assets = len(sigma)
+
         # only optimize if we have a re-balance trigger (early exit)
         if last_solution is not None and last_solution.sum() > 0.99:
-            trigger_values = row['trigger'].iloc[-1].values
-            if len(row['trigger'].columns) == len(row['returns'].columns):
-                # only exit if we have a signal for a significant part of the last solution
-                if trigger_values[last_solution >= 0.01].sum().any() < 1:
+            # so we had at least one valid solution in the past
+            # we can early exit if we do not have any signal or or no signal for any currently hold asset
+            if len(t.shape) > 1 and t.shape[1] == nr_of_assets:
+                if t[:, last_solution >= 0.01].sum().any() < 1:
                     return keep_solution
             else:
-                if trigger_values.sum().any() < 1:
+                if t.sum().any() < 1:
                     return keep_solution
 
-        # calculate covariance matrix # TODO use ewma covariance
-        # r = row['returns'].values
-        # cov = r.T @ r * (1 / period)
-        cov = row['returns'].cov().values
-
         # make sure covariance matrix is positive definite
-        cov = cov_nearest(cov)
+        simga = cov_nearest(sigma)
 
-        # calculate expected returns
-        er = (row['expected'].mean() if expected_returns is None else row['expected'].iloc[-1]).values
-
-        # we perform optimization
-        if len(er[er < 0]) == len(er):
+        # we perform optimization except when all expected returns are < 0
+        # then we early exit with an un-invest command
+        if len(pi[:, pi[0] < 0]) == pi.shape[1]:
             return uninvest
         else:
             try:
-                _log.debug(f"triggered rebalance at {row.index[-1]}")
-                sol = solve_qp(risk_aversion * cov, -er, G=G, h=h, A=A, b=b, solver=solver)
+                sol = solve_qp(risk_aversion * sigma, -pi.T, G=G, h=h, A=A, b=b, solver=solver)
                 if sol is None:
                     _log.error("no solution found")
                     return uninvest
@@ -83,21 +86,11 @@ def ta_markowitz(df: pd.DataFrame,
                 _log.error(traceback.format_exc())
                 return uninvest
 
-    # create a unified data frame
-    data = log_returns.join(expected).join(trigger).dropna()
-
-    # optimize portfolios and fill nan weights with previous weights
-    weights = np.zeros((len(data) - period, len(log_returns.columns)))
-    last_solution = None
-    for i in range(period, len(data)):
-        j = i - period
-        weights[j] = optimize_portfolios(data.iloc[i - period:i], last_solution)
-
-        if j > 0 and weights[j - 1].sum() > 0.9:
-            last_solution = weights[j - 1]
+    index = set(df.index.intersection(cov.index.get_level_values(0)).intersection(exp_ret.index).intersection(trigger.index))
+    weights = [optimize(trigger.loc[[i]].values, cov.loc[[i]].values, exp_ret[cov.columns].loc[[i]].values) for i in index]
 
     # turn weights into a data frame
-    weights = pd.DataFrame(weights, index=data.index[period:], columns=log_returns.columns.get_level_values(-1))
+    weights = pd.DataFrame(weights, index=index, columns=cov.columns)
 
     if result == 'fraction_per_dollar':
         price = df[prices].loc[weights.index]
@@ -105,3 +98,16 @@ def ta_markowitz(df: pd.DataFrame,
     else:
         return weights
 
+
+def _default_returns_estimator(df, prices, expected_returns, return_period, nr_of_assets):
+    # return
+    if expected_returns is None:
+        exp_ret = df[prices].pct_change().rolling(return_period).mean()
+    elif isinstance(expected_returns, (int, float, np.ndarray)):
+        exp_ret = pd.Series(np.ones((len(df), nr_of_assets)) * expected_returns, index=df.index)
+    elif isinstance(expected_returns, str):
+        exp_ret = df[expected_returns]
+    else:
+        exp_ret = expected_returns
+
+    return exp_ret.dropna()

@@ -32,7 +32,7 @@ class TestKerasLoss(TestCase):
         truth1 = 1
         truth2 = 5
         truth3 = 10
-        loss = tailed_categorical_crossentropy(args, 10)
+        loss = tailed_categorical_crossentropy(args, 1)
 
         """when"""
         res1 = np.array([K.eval(loss(K.variable(one_hot(truth1, args)), K.variable(one_hot(i, args)))) for i in range(args)])
