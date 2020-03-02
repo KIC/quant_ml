@@ -48,12 +48,18 @@ class LazyInit(object):
 
     def __init__(self, supplier):
         self.supplier = supplier
-        self.init = True
+        self.value = None
 
     def __call__(self, *args, **kwargs):
-        if self.init:
-            self.supplier = self.supplier()
-            self.init = False
+        if self.value is not None:
+            return self.value
+        else:
+            self.value = self.supplier()
+            return self.value
 
+    def __getstate__(self):
         return self.supplier
 
+    def __setstate__(self, state):
+        self.supplier = state
+        self.value = None

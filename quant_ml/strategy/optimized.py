@@ -18,7 +18,8 @@ def ta_markowitz(df: pd.DataFrame,
                  prices='Close',
                  expected_returns=None,
                  rebalance_trigger=None,
-                 solver='cvxopt'):
+                 solver='cvxopt',
+                 tail=None):
     assert isinstance(df.columns, pd.MultiIndex), \
         "expect multi index columns 'prices', 'expected returns' and rebalance trigger"
 
@@ -89,6 +90,9 @@ def ta_markowitz(df: pd.DataFrame,
                 return uninvest
 
     index = sorted(set(df.index.intersection(cov.index.get_level_values(0)).intersection(exp_ret.index).intersection(trigger.index)))
+    if tail is not None:
+        index = index[-abs(tail)]
+
     weights = [optimize(trigger.loc[[i]].values, cov.loc[[i]].values, exp_ret[cov.columns].loc[[i]].values) for i in index]
 
     # turn weights into a data frame
