@@ -39,11 +39,9 @@ class TestOptimizedStrategies(TestCase):
 
         """when"""
         portfolios = ta_markowitz(df_data,
-                                  period=20,
                                   prices='Close',
                                   expected_returns='expectation',
-                                  rebalance_trigger='trigger',
-                                  result='weights')
+                                  rebalance_trigger='trigger')
 
         """then"""
         print(portfolios)

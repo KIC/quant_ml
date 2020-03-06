@@ -8,9 +8,15 @@ import numpy as np
 
 import pandas as pd
 import os
+import dill as pickle
 
 df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "SPY.csv"), index_col='Date')
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+
+def save_object(obj, filename):
+    with open(filename, 'wb') as output:  # Overwrites any existing file.
+        pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
 
 
 class TestKerasLoss(TestCase):
@@ -62,15 +68,12 @@ class TestKerasLoss(TestCase):
         loss = tailed_categorical_crossentropy(categories, 1)
 
         """then"""
-        #for truth in range()
-        res1 = np.array([K.eval(loss(K.variable(one_hot(truth1, args)), K.variable(one_hot(i, args)))) for i in range(args)])
-        res2 = np.array([K.eval(loss(K.variable(one_hot(truth2, args)), K.variable(one_hot(i, args)))) for i in range(args)])
-        res3 = np.array([K.eval(loss(K.variable(one_hot(truth3, args)), K.variable(one_hot(i, args)))) for i in range(args)])
+        l = K.eval(loss(K.variable(one_hot(3, 11)), K.variable(one_hot(6, 11))))
+        pickle
 
         """then"""
-        #np.testing.assert_array_almost_equal(res1, np.array([ 10.,   0.,  10.,  40.,  90., 160., 250., 360., 490., 640., 810.]), 5)
-        #np.testing.assert_array_almost_equal(res2, np.array([250., 160.,  90.,  40.,  10.,   0.,  10.,  40.,  90., 160., 250.]), 5)
-        #np.testing.assert_array_almost_equal(res3, np.array([1000.,  810.,  640.,  490.,  360.,  250.,  160.,   90.,   40., 10.,    0.]), 5)
+        self.assertGreater(l, 0)
+        save_object(loss, '/tmp/test__tailed_categorical_crossentropy.dill')
 
     def test_normal_penalized_crossentropy(self):
         """when"""
@@ -88,4 +91,5 @@ class TestKerasLoss(TestCase):
 
         self.assertLess(K.eval(loss(K.variable(one_hot(3, 11)), K.variable(one_hot(2, 11)))),
                         K.eval(loss(K.variable(one_hot(3, 11)), K.variable(one_hot(4, 11)))))
+
 
