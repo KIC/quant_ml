@@ -152,7 +152,7 @@ def ta_bbands(df: _PANDAS, period=5, stddev=2.0, ddof=1) -> _PANDAS:
         z_score.name = "z"
         quantile.name = "quantile"
     else:
-        upper.columns = _pd.MultiIndex.from_product([upper.columns, ["uppen"]])
+        upper.columns = _pd.MultiIndex.from_product([upper.columns, ["upper"]])
         mean.columns = _pd.MultiIndex.from_product([mean.columns, ["mean"]])
         lower.columns = _pd.MultiIndex.from_product([lower.columns, ["lower"]])
         z_score.columns = _pd.MultiIndex.from_product([z_score.columns, ["z"]])

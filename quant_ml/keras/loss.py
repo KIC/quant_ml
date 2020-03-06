@@ -4,7 +4,7 @@ from keras.losses import categorical_crossentropy
 from quant_ml.util import LazyInit
 
 
-def tailed_categorical_crossentropy(nr_of_categories, alpha=0.1, beta=1e10, dtype='float32'):
+def tailed_categorical_crossentropy(nr_of_categories, alpha=0.1, beta=1e10, delta=1, dtype='float32'):
     """
     assuming that we have discretized something like returns where we have less observations in the tails.
     If we want to train a neural net to place returns into the expected bucket we want to penalize if the
@@ -17,13 +17,24 @@ def tailed_categorical_crossentropy(nr_of_categories, alpha=0.1, beta=1e10, dtyp
     :return: returns a keras loss function
     """
 
-    argmax = DifferentiableArgmax(nr_of_categories, beta, dtype=dtype)
+    parabolic_penalty = parabolic_crossentropy(nr_of_categories, delta, beta, dtype)
 
     # custom loss function is cross entropy with penalized tail errors
     def loss_function(y_true, y_pred):
-        penalty = alpha * (argmax(y_pred) - argmax(y_true)) ** 2
+        penalty = alpha * parabolic_penalty(y_pred, y_true)
         loss = categorical_crossentropy(y_true, y_pred)
         return loss + penalty
+
+    return loss_function
+
+
+def parabolic_crossentropy(nr_of_categories, delta=1, beta=1e10, dtype='float32'):
+    argmax = DifferentiableArgmax(nr_of_categories, beta, dtype=dtype)
+    offset = LazyInit(lambda: _K.constant(delta / 2, dtype=dtype))
+    f = LazyInit(lambda: _K.constant((nr_of_categories + delta) / nr_of_categories, dtype=dtype))
+
+    def loss_function(y_true, y_pred):
+        return ((argmax(y_pred) + offset()) - (argmax(y_true)) * f()) ** 2
 
     return loss_function
 

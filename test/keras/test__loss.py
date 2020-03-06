@@ -2,7 +2,8 @@ from unittest import TestCase
 from keras import backend as K
 
 from quant_ml.util import one_hot
-from quant_ml.keras.loss import tailed_categorical_crossentropy, DifferentiableArgmax, normal_penalized_crossentropy
+from quant_ml.keras.loss import tailed_categorical_crossentropy, DifferentiableArgmax, normal_penalized_crossentropy, \
+    parabolic_crossentropy
 import numpy as np
 
 import pandas as pd
@@ -26,15 +27,42 @@ class TestKerasLoss(TestCase):
         print(res)
         np.testing.assert_array_almost_equal(res, np.arange(0, args))
 
-    def test__tailed_categorical_crossentropy(self):
-        """given"""
-        args = 11
-        truth1 = 1
-        truth2 = 5
-        truth3 = 10
-        loss = tailed_categorical_crossentropy(args, 1)
-
+    def test__parabolic_crossentropy(self):
         """when"""
+        categories = 11
+        loss_function = parabolic_crossentropy(categories, 1)
+
+        """then"""
+        for truth in range(categories):
+            losses = []
+            for prediction in range(categories):
+                loss = K.eval(loss_function(K.variable(one_hot(truth, categories)),
+                                            K.variable(one_hot(prediction, categories))))
+                losses.append(loss)
+
+            # all predictions left of truth need to increase
+            for i in range(1, truth):
+                self.assertGreater(losses[i - 1], losses[i])
+
+            # right of truth need to decrease
+            for i in range(truth, categories - 1):
+                self.assertLess(losses[i], losses[i + 1])
+
+            if truth > 0 and truth < categories - 1:
+                if truth > categories / 2:
+                    # right tail:
+                    self.assertGreater(losses[truth - 1], losses[truth + 1])
+                else:
+                    # left tail
+                    self.assertGreater(losses[truth + 1], losses[truth - 1])
+
+    def test__tailed_categorical_crossentropy(self):
+        """when"""
+        categories = 11
+        loss = tailed_categorical_crossentropy(categories, 1)
+
+        """then"""
+        #for truth in range()
         res1 = np.array([K.eval(loss(K.variable(one_hot(truth1, args)), K.variable(one_hot(i, args)))) for i in range(args)])
         res2 = np.array([K.eval(loss(K.variable(one_hot(truth2, args)), K.variable(one_hot(i, args)))) for i in range(args)])
         res3 = np.array([K.eval(loss(K.variable(one_hot(truth3, args)), K.variable(one_hot(i, args)))) for i in range(args)])
