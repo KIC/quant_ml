@@ -1,13 +1,11 @@
-import datetime as dt
-
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
-import numpy as np
-from mpl_finance import candlestick_ohlc, volume_overlay
 import pandas as pd
+from mpl_finance import candlestick_ohlc
 
-def ta_candlestick(self, open="Open", high="High", low="Low", close="Close", volume=None, ax=None, **kwargs):
-    df = self._parent
+
+def ta_candlestick(self, open="Open", high="High", low="Low", close="Close", ax=None, **kwargs):
+    df = self if isinstance(self, pd.DataFrame) else self._parent
 
     if ax is None:
         fig, ax = plt.subplots()
@@ -20,17 +18,10 @@ def ta_candlestick(self, open="Open", high="High", low="Low", close="Close", vol
         "close": df[close],
     })
 
-    if volume is not None:
-        data["volume"] = df[volume]
-
     # Plot candlestick chart
     ax.xaxis_date()
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%Y'))
     plt.xticks(rotation=45)
 
-    if volume is not None:
-        candlestick(ax, data.values, width=0.6, colorup='g', colordown='r')
-    else:
-        candlestick_ohlc(ax, data.values, width=0.6, colorup='g', colordown='r')
-
+    candlestick_ohlc(ax, data.values, width=0.6, colorup='g', colordown='r')
     return ax
