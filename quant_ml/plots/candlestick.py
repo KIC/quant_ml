@@ -9,7 +9,11 @@ def ta_candlestick(self, open="Open", high="High", low="Low", close="Close", ax=
 
     if ax is None:
         fig, ax = plt.subplots()
+        ax.xaxis_date()
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%Y'))
+        plt.xticks(rotation=45)
 
+    # Plot candlestick chart
     data = pd.DataFrame({
         "Date": mdates.date2num(df.index),
         "open": df[open],
@@ -17,11 +21,6 @@ def ta_candlestick(self, open="Open", high="High", low="Low", close="Close", ax=
         "low": df[low],
         "close": df[close],
     })
-
-    # Plot candlestick chart
-    ax.xaxis_date()
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%Y'))
-    plt.xticks(rotation=45)
 
     candlestick_ohlc(ax, data.values, width=0.6, colorup='g', colordown='r')
     return ax

@@ -12,6 +12,7 @@ import quant_ml.indicator.forecast as forecast
 import quant_ml.indicator.labels as forward_indicators
 import quant_ml.plots.panel as plot_master
 import quant_ml.plots.candlestick as plot_candlestick
+import quant_ml.plots.bar as plot_bars
 import quant_ml.strategy.optimized as optimized_strategies
 from pandas_ml_utils import *
 from pandas_ml_utils import _PandasObject
@@ -27,7 +28,7 @@ for indicator_functions in [indicators, forward_indicators, categorize, forecast
             setattr(_PandasObject, indicator_function, getattr(indicator_functions, indicator_function))
 
 
-for plot_functions in [plot_candlestick]:
+for plot_functions in [plot_candlestick, plot_bars]:
     for plot_function in dir(plot_functions):
         if plot_function.startswith("ta_"):
             setattr(pd.DataFrame.plot, plot_function, getattr(plot_functions, plot_function))

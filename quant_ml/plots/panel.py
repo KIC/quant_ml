@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib import gridspec
 
+from quant_ml.plots.bar import ta_stacked_bar
 from quant_ml.plots.candlestick import ta_candlestick
 
 
@@ -41,11 +42,11 @@ class TaPlot(object):
         self.axis[panel] = ta_candlestick(self.df, open, high, low, close, ax=self.axis[panel])
         return self._return()
 
-    def stacked_bar(self):
-        pass
+    def stacked_bar(self, columns, padding=0.02, panel=1, **kwargs ):
+        self.axis[panel] = ta_stacked_bar(self.df, columns, ax=self.axis[panel], padding=padding, **kwargs)
+        return self._return()
 
     def bar(self, fields="Volume", panel=1, **kwargs):
-        # x, height, width=0.8, bottom=None, *, align='center', data=None, **kwargs)
         self.axis[panel].bar(self.x, height=self.df[fields].values, **kwargs)
         return self._return()
 
