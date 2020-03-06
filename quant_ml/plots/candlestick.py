@@ -1,17 +1,15 @@
 import matplotlib.dates as mdates
-import matplotlib.pyplot as plt
 import pandas as pd
 from mpl_finance import candlestick_ohlc
 
+from quant_ml.plots.utils import new_fig_axis
 
-def ta_candlestick(self, open="Open", high="High", low="Low", close="Close", ax=None, **kwargs):
+
+def ta_candlestick(self, open="Open", high="High", low="Low", close="Close", ax=None, figsize=None, **kwargs):
     df = self if isinstance(self, pd.DataFrame) else self._parent
 
     if ax is None:
-        fig, ax = plt.subplots()
-        ax.xaxis_date()
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%Y'))
-        plt.xticks(rotation=45)
+        fig, ax = new_fig_axis(figsize)
 
     # Plot candlestick chart
     data = pd.DataFrame({
