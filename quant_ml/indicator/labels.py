@@ -1,4 +1,5 @@
 import pandas as _pd
+import numpy as _np
 from typing import Union as _Union
 import quant_ml.indicator.features as _i
 
@@ -47,6 +48,9 @@ def ta_future_multiband_bucket(df: _pd.Series, forecast_period=14, period=5, std
 
     # return index of bucket of which the future price lies in
     def index_of_bucket(value, data):
+        if _np.isnan(value):
+            return value
+
         for i, v in enumerate(data):
             if value < v:
                 return i

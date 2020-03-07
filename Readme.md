@@ -8,7 +8,7 @@ There are also a couple of nice plotting extensions.
 ### Plotting
 There is a new ta_plot(rows, columns, figsize) function which returns as TaPlot object:
 ```python
-from pandas_ml_utils import pd
+from quant_ml import pd
 
 plt = pd.fetch_yahoo("SPY")[-100:].ta_plot()
 plt.candlestick()
@@ -19,7 +19,7 @@ plt.bar("Volume")
 
 Or just via shortcut
 ```python
-from pandas_ml_utils import pd
+from quant_ml import pd
 
 pd.fetch_yahoo("QQQ").ta_plot()()
 ```
@@ -27,7 +27,7 @@ pd.fetch_yahoo("QQQ").ta_plot()()
 
 Of course you can add as many panels as you like
 ```python
-from pandas_ml_utils import pd
+from quant_ml import pd
 
 df = pd.fetch_yahoo("SPY")[-100:]
 plt = df.ta_plot(3)
