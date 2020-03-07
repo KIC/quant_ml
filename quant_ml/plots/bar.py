@@ -4,6 +4,7 @@ import pandas as pd
 from typing import List
 
 from quant_ml.plots.utils import new_fig_axis
+from quant_ml.util import pandas_data
 
 
 def ta_stacked_bar(self, columns, figsize=None, ax=None, padding=0.02, **kwargs):
@@ -23,11 +24,13 @@ def ta_stacked_bar(self, columns, figsize=None, ax=None, padding=0.02, **kwargs)
 
     bottom = None
     for column in columns:
+        data = pandas_data(df, column)
+
         if bottom is not None:
             kwargs["bottom"] = bottom
-            height = df[column] - bottom
+            height = data - bottom
         else:
-            height = df[column]
+            height = data
 
         bottom = height if bottom is None else bottom + height
         ax.bar(mdates.date2num(df.index), height, **kwargs)
@@ -35,8 +38,9 @@ def ta_stacked_bar(self, columns, figsize=None, ax=None, padding=0.02, **kwargs)
     return ax
 
 
-def ta_bar(self, columns, figsize=None, ax=None, padding=0.02, **kwargs):
+def ta_bars(self, columns, figsize=None, ax=None, padding=0.02, **kwargs):
     df = self if isinstance(self, pd.DataFrame) else self._parent
+    # FIXME allow to pass pandas objects as columns
     columns = columns if isinstance(columns, List) else list(columns)
 
     if ax is None:

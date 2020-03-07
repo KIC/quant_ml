@@ -2,6 +2,7 @@ from collections import OrderedDict
 
 import numpy as np
 from numba import guvectorize, float32, int32, float64, int64
+from pandas.core.base import PandasObject
 
 
 def one_hot(index, len):
@@ -29,6 +30,13 @@ def arange_open(start, stop, step, round=None):
         arr[-1] = float('inf')
 
     return arr if round is None else arr.round(round)
+
+
+def pandas_data(df, col):
+    if isinstance(col, PandasObject):
+        return col
+    else:
+        return df[col]
 
 
 @guvectorize([(float32[:], int32, float32[:]),

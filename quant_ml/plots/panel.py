@@ -5,15 +5,16 @@ from matplotlib import gridspec
 
 from quant_ml.plots.bar import ta_stacked_bar
 from quant_ml.plots.candlestick import ta_candlestick
+from quant_ml.util import pandas_data
 
 
-def ta_plot(df: pd.DataFrame, figsize=(16, 14), rows=2, cols=1):
+def ta_plot(df: pd.DataFrame, rows=2, cols=1, figsize=(18, 10)):
     return TaPlot(df, figsize, rows, cols)
 
 
 class TaPlot(object):
 
-    def __init__(self, df: pd.DataFrame, figsize=(12, 8), rows=2, cols=1, main_height_ratio=4):
+    def __init__(self, df: pd.DataFrame, figsize, rows=2, cols=1, main_height_ratio=4):
         fig = plt.figure('r-', figsize=figsize)
         grid = gridspec.GridSpec(rows, cols, height_ratios=[main_height_ratio, *[1 for _ in range(1, rows)]])
         axis = []
@@ -46,12 +47,18 @@ class TaPlot(object):
         self.axis[panel] = ta_stacked_bar(self.df, columns, ax=self.axis[panel], padding=padding, **kwargs)
         return self._return()
 
+    def bars(self):
+        # FIXME add side by side bars
+        pass
+
     def bar(self, fields="Volume", panel=1, **kwargs):
-        self.axis[panel].bar(self.x, height=self.df[fields].values, **kwargs)
+        data = pandas_data(self.df, fields).values
+        self.axis[panel].bar(self.x, height=data, **kwargs)
         return self._return()
 
     def line(self, fields="Close", panel=0, **kwargs):
-        self.axis[panel].plot(self.x, self.df[fields].values, **kwargs)
+        data = pandas_data(self.df, fields).values
+        self.axis[panel].plot(self.x, data, **kwargs)
         return self._return()
 
     def __call__(self, *args, **kwargs):
