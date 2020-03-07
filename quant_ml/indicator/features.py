@@ -135,19 +135,6 @@ def ta_adx(df: _PANDAS, period=14, high="High", low="Low", close="Close", relati
     return _pd.DataFrame({"+DM": pdm, "-DM": ndm, "+DI": pdi, "-DI": ndi, "ADX": adx}, index=df.index)
 
 
-def ta_multi_bbands(s: _pd.Series, period=5, stddevs=[1.0, 1.5, 2.0], ddof=1) -> _PANDAS:
-    assert isinstance(s, _pd.Series)
-    mean = s.rolling(period).mean().rename("mean")
-    std = s.rolling(period).std(ddof=ddof)
-    df = mean.to_frame()
-
-    for stddev in stddevs:
-        df[f'upper-{stddev}'] = mean + (std * stddev)
-        df[f'lower-{stddev}'] = mean - (std * stddev)
-
-    return df
-
-
 def ta_bbands(df: _PANDAS, period=5, stddev=2.0, ddof=1) -> _PANDAS:
     mean = df.rolling(period).mean()
     std = df.rolling(period).std(ddof=ddof)
@@ -309,6 +296,23 @@ def ta_gaf(df: _PANDAS,
         return gaf.fit_transform(df.values)
 
     return _pd.Series([to_gaf(df.iloc[i-period, period]) for i in range(period, len(df))], index=df.index, name="GAF")
+
+
+def ta_multi_bbands(s: _pd.Series, period=5, stddevs=[1.0, 1.5, 2.0], ddof=1) -> _PANDAS:
+    assert isinstance(s, _pd.Series)
+    mean = s.rolling(period).mean().rename("mean")
+    std = s.rolling(period).std(ddof=ddof)
+    df = _pd.DataFrame({}, index=mean.index)
+
+    for stddev in reversed(stddevs):
+        df[f'lower-{stddev}'] = mean - (std * stddev)
+
+    df["mean"] = mean
+
+    for stddev in stddevs:
+        df[f'upper-{stddev}'] = mean + (std * stddev)
+
+    return df
 
 
 

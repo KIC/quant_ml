@@ -51,3 +51,10 @@ class TestIndicators(TestCase):
         self.assertEqual(0, q.iloc[-7])
         self.assertEqual(1, q.iloc[-8])
 
+    def test__future_multiband_bucket(self):
+        bucket = ta_future_multiband_bucket(DF_TEST["Close"], 2)
+        print(bucket[-10:])
+
+        self.assertEqual(9, bucket.iloc[-2])
+        self.assertEqual(4, bucket.iloc[-3])
+        self.assertEqual(1, bucket.iloc[-4])

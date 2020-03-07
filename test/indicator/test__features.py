@@ -168,9 +168,10 @@ class TestIndicator(TestCase):
 
     def test__ta_multi_bbands(self):
         me = ta_multi_bbands(DF_TEST["Close"])[-1:]
+        print(me.values.round(3))
 
         np.testing.assert_array_almost_equal(
             me,
-            np.array([[311.809, 313.512, 310.107, 314.363, 309.256, 315.214, 308.405]]),
+            np.array([[308.406, 309.257, 310.108, 311.81, 313.512, 314.363, 315.214]]),
             0.001)
 

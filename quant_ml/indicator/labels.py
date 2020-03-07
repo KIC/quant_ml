@@ -40,3 +40,19 @@ def ta_future_bband_quantile(df: _pd.Series, forecast_period=14, period=5, stdde
 
     return quantile
 
+
+def ta_future_multiband_bucket(df: _pd.Series, forecast_period=14, period=5, stddevs=[0.5, 1.0, 1.5, 2.0], ddof=1):
+    buckets = _i.ta_multi_bbands(df, period, stddevs=stddevs, ddof=ddof)
+    future = df.shift(-forecast_period)
+
+    # return index of bucket of which the future price lies in
+    def index_of_bucket(value, data):
+        for i, v in enumerate(data):
+            if value < v:
+                return i
+
+        return len(data)
+
+    return \
+      buckets.join(future).apply(lambda row: index_of_bucket(row[future.name], row[buckets.columns]), axis=1, raw=False)
+
