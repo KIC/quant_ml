@@ -2,7 +2,7 @@ pandas-ml-utils
 scikit-learn
 mpl_finance
 matplotlib
-tensorflow==1.14.0
+tensorflow==2.6.4
 colorama>= 0.3.9
 qpsolvers
 mlxtend
