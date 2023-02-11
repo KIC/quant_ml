@@ -1,6 +1,6 @@
 NOTE: this is far from being released. Future development happens at https://github.com/Pandas-Quant-Finance
 
-however this library is stable enough for my personal use for stock trading algorithms powered by ML models. It is intended to be
+However, this library is stable enough for my personal use for stock trading algorithms powered by ML models. It is intended to be
 used together with pandas-ml-utils.
 
 There are also a couple of nice plotting extensions.
